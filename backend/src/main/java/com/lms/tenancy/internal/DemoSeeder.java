@@ -119,7 +119,7 @@ class DemoSeeder implements ApplicationRunner {
                             on conflict (keycloak_sub) do update set email = excluded.email, name = excluded.name
                             returning id
                             """)
-                    .params(UuidV7.generate(), sub, email, p.first() + " " + p.last())
+                    .params(UuidV7.generate(), sub, email, MembershipTenantResolver.displayName(null, p.first(), p.last()))
                     .query(UUID.class).single());
         }
 

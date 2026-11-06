@@ -78,7 +78,8 @@ class MembershipTenantResolver implements TenantResolver {
     private AppUser provision(Jwt jwt) {
         String sub = jwt.getSubject();
         String email = Optional.ofNullable(jwt.getClaimAsString("email")).orElse(sub);
-        String name = jwt.getClaimAsString("name");
+        String name = displayName(jwt.getClaimAsString("name"), jwt.getClaimAsString("given_name"),
+                jwt.getClaimAsString("family_name"));
         try {
             return tx.execute(status -> {
                 AppUser user = users.findByKeycloakSub(sub).orElse(null);
@@ -94,6 +95,23 @@ class MembershipTenantResolver implements TenantResolver {
             // The other request inserted the same sub first; the unique constraint kept us consistent.
             return users.findByKeycloakSub(sub).orElseThrow(() -> raceLost);
         }
+    }
+
+    /**
+     * Keycloak's {@code name} claim is always "given family" ("하나 김"). Korean names read family
+     * name first with no space ("김하나"), so when either part is Hangul we compose it ourselves;
+     * otherwise the claim stays as Keycloak built it ("Jane Doe").
+     */
+    static String displayName(String name, String given, String family) {
+        boolean bothParts = given != null && !given.isBlank() && family != null && !family.isBlank();
+        if (bothParts && (isHangul(given) || isHangul(family))) {
+            return family.strip() + given.strip();
+        }
+        return name;
+    }
+
+    private static boolean isHangul(String text) {
+        return text.codePoints().anyMatch(c -> Character.UnicodeScript.of(c) == Character.UnicodeScript.HANGUL);
     }
 
     static UUID requireUserId() {
