@@ -14,6 +14,9 @@ B2B 멀티테넌트 사내교육 LMS의 기획·설계 문서다. 모든 결정�
 | [06-security.md](06-security.md) | 위협 모델(OWASP Top 10), 계층별 보안 장치, 예상 질문 |
 | [07-schedule.md](07-schedule.md) | 5일 실행 계획, 범위 축소 순서, 위험 평가 |
 | [08-cost-and-limits.md](08-cost-and-limits.md) | AWS 비용, 시연으로는 무리인 것, 표준에서 벗어난 곳 |
+| [09-interview-qa.md](09-interview-qa.md) | 예상 질문과 답 18문항 |
+| [10-demo-script.md](10-demo-script.md) | 5분 시연 대본, 아키텍처 1분, 리허설 체크리스트 |
+| [notes/](notes/) | 일별 면접 설명 노트 (Day 1~5) |
 | [../DESIGN.md](../DESIGN.md) | 디자인 계약서 "인장과 이수증": 색·서체·컴포넌트·상태·접근성 규칙과 이유 |
 | [../PRODUCT.md](../PRODUCT.md) | 디자인 도구가 읽는 제품 요약 |
 | [design/REVIEW.md](design/REVIEW.md) | 디자인 검토 기준 (CI 검사 → 체크리스트 → 5개 관점 점수) |
