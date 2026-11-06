@@ -97,7 +97,7 @@ AWS 배포 설계(ECS Fargate, RDS, ElastiCache, SQS, S3/CloudFront, MediaConver
 | 디자인 시스템 (`pnpm --filter @lms/ui test`) | 59 | 모든 스토리를 Chromium에서 실행: 상호작용(`play`) + axe 접근성 검사 |
 | 토큰 대비 (`pnpm --filter @lms/ui check:contrast`) | 28쌍 | DESIGN.md가 쓰는 모든 색 조합이 WCAG 2.2 AA |
 
-GitHub Actions에서 PR마다 실행됩니다([backend](.github/workflows/backend.yml), [frontend](.github/workflows/frontend.yml)).
+지금은 로컬에서 실행합니다. GitHub Actions 설정(PR마다 위 세 가지를 실행)은 준비되어 있고, 저장소 권한 설정 후 추가할 예정입니다.
 
 ---
 
