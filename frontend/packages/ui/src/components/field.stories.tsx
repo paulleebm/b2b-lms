@@ -1,8 +1,8 @@
 import type { Meta, StoryObj } from "@storybook/react-vite";
-import { expect, within } from "storybook/test";
+import { expect, userEvent, within } from "storybook/test";
 
 import { Button } from "./button";
-import { Field, Input, Textarea } from "./field";
+import { Field, Input, Select, Textarea } from "./field";
 import { Notice } from "./notice";
 
 const meta = {
@@ -71,5 +71,67 @@ export const FormWithServerError: Story = {
         회사 등록
       </Button>
     </form>
+  ),
+};
+
+/** Native select styled like Input; Field wires the label, hint and error the same way. */
+export const SelectField: Story = {
+  args: {
+    label: "역할",
+    hint: "나중에 멤버 표에서 바꿀 수 있습니다.",
+    children: (
+      <Select defaultValue="LEARNER">
+        <option value="ORG_ADMIN">조직 관리자</option>
+        <option value="INSTRUCTOR">강사</option>
+        <option value="LEARNER">학습자</option>
+      </Select>
+    ),
+  },
+  play: async ({ canvasElement }) => {
+    const select = within(canvasElement).getByRole("combobox", { name: "역할" });
+    await expect(select).toHaveAccessibleDescription("나중에 멤버 표에서 바꿀 수 있습니다.");
+    await userEvent.selectOptions(select, "INSTRUCTOR");
+    await expect(select).toHaveValue("INSTRUCTOR");
+  },
+};
+
+export const SelectInvalid: Story = {
+  args: {
+    label: "부서",
+    error: "부서를 고르세요. 목록에 없으면 부서 화면에서 먼저 만드세요.",
+    children: (
+      <Select defaultValue="">
+        <option value="">고르세요</option>
+        <option value="d-dev">개발팀</option>
+      </Select>
+    ),
+  },
+};
+
+export const SelectDisabled: Story = {
+  args: {
+    label: "역할",
+    hint: "본인 계정의 역할은 바꿀 수 없습니다.",
+    children: (
+      <Select defaultValue="ORG_ADMIN" disabled>
+        <option value="ORG_ADMIN">조직 관리자</option>
+      </Select>
+    ),
+  },
+};
+
+/** 32px variant for table rows and toolbars. Long option text truncates inside the control. */
+export const SelectSmall: Story = {
+  args: { label: "", children: <span /> },
+  render: () => (
+    <div className="grid w-40 gap-2">
+      <Select size="sm" aria-label="역할" defaultValue="INSTRUCTOR">
+        <option value="ORG_ADMIN">조직 관리자</option>
+        <option value="INSTRUCTOR">강사</option>
+      </Select>
+      <Select size="sm" aria-label="부서" defaultValue="long">
+        <option value="long">글로벌 전략기획본부 디지털트랜스포메이션 추진단</option>
+      </Select>
+    </div>
   ),
 };

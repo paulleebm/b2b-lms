@@ -10,6 +10,10 @@ const keycloakOrigin = new URL(
   process.env.KEYCLOAK_ISSUER ?? "http://localhost:8080/realms/lms",
 ).origin;
 
+// Uploads go from the browser straight to S3 with presigned URLs (the bytes never touch our
+// servers), so the bucket's origin must be reachable. Locally that is S3Mock.
+const storageOrigin = new URL(process.env.STORAGE_ORIGIN ?? "http://localhost:9090").origin;
+
 // Next.js injects inline bootstrap scripts, so script-src needs 'unsafe-inline' unless we
 // move to per-request nonces (planned once pages stabilise). Dev additionally needs
 // 'unsafe-eval' (React Refresh) and websocket connections (HMR).
@@ -19,7 +23,8 @@ const contentSecurityPolicy = [
   "style-src 'self' 'unsafe-inline'",
   "img-src 'self' data: blob:",
   "font-src 'self' data:",
-  `connect-src 'self'${isDev ? " ws: wss:" : ""}`,
+  `connect-src 'self' ${storageOrigin}${isDev ? " ws: wss:" : ""}`,
+  `media-src 'self' blob: ${storageOrigin}`,
   `form-action 'self' ${keycloakOrigin}`,
   "frame-ancestors 'none'",
   "base-uri 'self'",
@@ -41,7 +46,7 @@ const nextConfig: NextConfig = {
   poweredByHeader: false,
   reactStrictMode: true,
   // @lms/ui ships TypeScript source; let Next compile it.
-  transpilePackages: ["@lms/ui"],
+  transpilePackages: ["@lms/ui", "@lms/api-client"],
   async headers() {
     return [{ source: "/:path*", headers: securityHeaders }];
   },

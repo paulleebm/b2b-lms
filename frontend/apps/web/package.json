@@ -11,6 +11,7 @@
   },
   "dependencies": {
     "@hookform/resolvers": "^7.0.3",
+    "@lms/api-client": "workspace:*",
     "@lms/ui": "workspace:*",
     "ioredis": "^5.11.1",
     "lucide-react": "^1.69.0",

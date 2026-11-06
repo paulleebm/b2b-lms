@@ -1,5 +1,5 @@
 import * as React from "react";
-import { CircleAlert } from "lucide-react";
+import { ChevronDown, CircleAlert } from "lucide-react";
 
 import { cn } from "../lib/utils";
 
@@ -42,6 +42,40 @@ function Textarea({ className, ...props }: React.ComponentProps<"textarea">) {
   );
 }
 
+type SelectProps = Omit<React.ComponentProps<"select">, "size"> & {
+  /** md = 36px (forms), sm = 32px (table rows, toolbars). */
+  size?: "sm" | "md";
+  /** Classes for the wrapper (width, margins). The native select always fills it. */
+  className?: string;
+};
+
+/**
+ * Native `<select>` styled like Input. Native on purpose: keyboard, type-ahead, mobile pickers
+ * and screen-reader support come for free, and there is nothing to re-implement. The chevron
+ * is drawn on top (pointer-events: none) so the whole control stays clickable.
+ * Works inside Field: id / aria-* props are forwarded to the select.
+ */
+function Select({ className, size = "md", children, ...props }: SelectProps) {
+  return (
+    <span data-slot="select" className={cn("relative block w-full min-w-0", className)}>
+      <select
+        className={cn(
+          controlBase,
+          "appearance-none truncate pr-8",
+          size === "sm" ? "h-8 pl-2.5 text-label" : "h-9 pl-3",
+        )}
+        {...props}
+      >
+        {children}
+      </select>
+      <ChevronDown
+        className="pointer-events-none absolute top-1/2 right-2.5 size-4 -translate-y-1/2 stroke-[1.75] text-muted"
+        aria-hidden="true"
+      />
+    </span>
+  );
+}
+
 type FieldProps = {
   /** Visible label. Required: placeholders are not labels. */
   label: string;
@@ -52,7 +86,7 @@ type FieldProps = {
   /** Marks the label; required fields are the norm, so we mark the optional ones instead. */
   optional?: boolean;
   className?: string;
-  /** A single control (Input, Textarea, select). id / aria-* are injected. */
+  /** A single control (Input, Textarea, Select). id / aria-* are injected. */
   children: React.ReactElement<React.ComponentProps<"input">>;
 };
 
@@ -88,4 +122,4 @@ function Field({ label, hint, error, optional, className, children }: FieldProps
   );
 }
 
-export { Field, Input, Label, Textarea, type FieldProps };
+export { Field, Input, Label, Select, Textarea, type FieldProps, type SelectProps };
