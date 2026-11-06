@@ -105,7 +105,7 @@ AWS 배포 설계(ECS Fargate, RDS, ElastiCache, SQS, S3/CloudFront, MediaConver
 
 필요: Docker Desktop, JDK 21, Node 22+ (corepack으로 pnpm 사용)
 
-1. 인프라 (PostgreSQL, Valkey, Keycloak, Mailpit)
+1. 인프라 (PostgreSQL, Valkey, Keycloak, Mailpit, S3Mock)
 
 ```bash
 docker compose -f infra/local/docker-compose.yml up -d
@@ -137,7 +137,8 @@ cd frontend && pnpm --filter @lms/ui storybook
 |---|---|
 | http://localhost:8080 | Keycloak 관리 콘솔 (admin / admin_dev) |
 | http://localhost:8081/swagger-ui.html | API 문서 |
-| http://localhost:8025 | Mailpit (개발용 메일함) |
+| http://localhost:8025 | Mailpit (개발용 메일함: 초대 메일이 여기로 온다) |
+| http://localhost:9090 | S3Mock (로컬 S3, 업로드 파일 저장소) |
 
 ---
 
@@ -165,13 +166,14 @@ DESIGN.md · PRODUCT.md  디자인 계약서, 제품 요약
 
 ## 진행 상황
 
-5일 계획([docs/07-schedule.md](docs/07-schedule.md)) 중 **Day 1** 완료.
+5일 계획([docs/07-schedule.md](docs/07-schedule.md)) 중 **Day 2** 완료.
 
 - [x] 기획·설계 문서 (요구사항, 기술 결정, 아키텍처, 데이터 모델, 서비스 흐름, 보안, 비용)
 - [x] 멀티테넌트 기반: Keycloak 연동, 테넌트 격리(앱 + RLS), 회사 등록, 부서
 - [x] BFF 로그인 (OIDC + PKCE, Redis 세션, 토큰 회전 대비 분산 락)
 - [x] 디자인 시스템 "인장과 이수증" + Storybook + 디자인 검토 게이트
-- [ ] Day 2: 멤버·초대, 코스·레슨, S3 Multipart 업로드, AWS 배포 골격(Terraform)
+- [x] Day 2: 멤버·초대(사가), 코스 스튜디오(ETag/If-Match), S3 직접 업로드(presigned·multipart), OpenAPI → TS 타입
+- [ ] Day 2에서 미룸: AWS 배포 골격(Terraform, 계정 필요), CI(토큰 권한 필요)
 - [ ] Day 3: 배정·수강·진도(xAPI)·퀴즈·수료
 - [ ] Day 4: 대시보드 API, 수료증(아웃박스 → SQS), 영상 변환(HLS)
 - [ ] Day 5: CD, 관측성, 시드 데이터, 발표 준비
@@ -190,7 +192,8 @@ DESIGN.md · PRODUCT.md  디자인 계약서, 제품 요약
 | [06 보안](docs/06-security.md) | OWASP Top 10 기준 위협과 대응 |
 | [07 일정](docs/07-schedule.md) | 5일 실행 계획과 범위 축소 순서 |
 | [08 비용과 한계](docs/08-cost-and-limits.md) | AWS 비용, 시연 한계, 의도적으로 표준에서 벗어난 곳 |
-| [Day 1 설명 노트](docs/notes/day1.md) | 오늘 만든 코드를 내 말로 설명하기 |
+| [Day 1 설명 노트](docs/notes/day1.md) | 인증 연결과 멀티테넌트 격리를 내 말로 설명하기 |
+| [Day 2 설명 노트](docs/notes/day2.md) | 초대 사가, 코스 동시성, 직접 업로드를 내 말로 설명하기 |
 
 ---
 
