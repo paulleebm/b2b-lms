@@ -45,7 +45,7 @@
       "directAccessGrantsEnabled": false,
       "serviceAccountsEnabled": false,
       "frontchannelLogout": false,
-      "redirectUris": ["http://localhost:3000/auth/callback"],
+      "redirectUris": ["http://localhost:3000/auth/callback", "http://localhost:3000/auth/login"],
       "webOrigins": ["http://localhost:3000"],
       "attributes": {
         "pkce.code.challenge.method": "S256",

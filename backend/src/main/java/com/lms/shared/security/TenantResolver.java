@@ -13,9 +13,10 @@ public interface TenantResolver {
     ResolvedPrincipal resolve(Jwt jwt);
 
     /**
-     * @param tenantId null when the token carries no organization (e.g. before company signup)
-     * @param role     null when tenantId is null
+     * @param tenantId     null when the token carries no organization (e.g. before company signup)
+     * @param membershipId null when tenantId is null
+     * @param role         null when tenantId is null
      */
-    record ResolvedPrincipal(UUID userId, UUID tenantId, String role) {
+    record ResolvedPrincipal(UUID userId, UUID tenantId, UUID membershipId, String role) {
     }
 }

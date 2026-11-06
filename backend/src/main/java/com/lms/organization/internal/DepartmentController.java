@@ -12,7 +12,9 @@ import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -50,6 +52,18 @@ class DepartmentController {
         return ResponseEntity.created(URI.create("/v1/departments/" + created.id())).body(created);
     }
 
+    @PatchMapping("/{id}")
+    DepartmentResponse rename(@PathVariable UUID id, @Valid @RequestBody CreateDepartmentRequest request) {
+        return service.rename(id, request.name().strip());
+    }
+
+    /** 409 DEPARTMENT_IN_USE while members are assigned (the tenant-scoped foreign key decides). */
+    @DeleteMapping("/{id}")
+    ResponseEntity<Void> delete(@PathVariable UUID id) {
+        service.delete(id);
+        return ResponseEntity.noContent().build();
+    }
+
     record CreateDepartmentRequest(@NotBlank @Size(max = 100) String name) {
     }
 
@@ -61,12 +75,41 @@ class DepartmentController {
 }
 
 @org.springframework.stereotype.Service
-class DepartmentService {
+class DepartmentService implements com.lms.organization.DepartmentDirectory {
 
     private final DepartmentRepository departments;
 
     DepartmentService(DepartmentRepository departments) {
         this.departments = departments;
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public boolean exists(UUID departmentId) {
+        return departments.existsById(departmentId);
+    }
+
+    @Transactional
+    DepartmentController.DepartmentResponse rename(UUID id, String name) {
+        Department department = departments.findById(id)
+                .orElseThrow(() -> ApiException.notFound("DEPARTMENT_NOT_FOUND", "부서를 찾을 수 없습니다."));
+        if (!department.getName().equals(name) && departments.existsByName(name)) {
+            throw ApiException.conflict("DEPARTMENT_NAME_TAKEN", "같은 이름의 부서가 이미 있습니다.");
+        }
+        department.rename(name);
+        return DepartmentController.DepartmentResponse.of(department);
+    }
+
+    @Transactional
+    void delete(UUID id) {
+        Department department = departments.findById(id)
+                .orElseThrow(() -> ApiException.notFound("DEPARTMENT_NOT_FOUND", "부서를 찾을 수 없습니다."));
+        try {
+            departments.delete(department);
+            departments.flush();
+        } catch (DataIntegrityViolationException e) {
+            throw ApiException.conflict("DEPARTMENT_IN_USE", "이 부서에 배치된 멤버가 있습니다. 멤버의 부서를 먼저 바꾸세요.");
+        }
     }
 
     @Transactional(readOnly = true)

@@ -1,7 +1,7 @@
 # Local development stack.
 #   docker compose -f infra/local/docker-compose.yml up -d
 #
-# Ports:  postgres 5432 · valkey 6379 · keycloak 8080 · mailpit 8025 (UI) / 1025 (SMTP)
+# Ports:  postgres 5432 · valkey 6379 · keycloak 8080 · mailpit 8025 (UI) / 1025 (SMTP) · s3mock 9090
 # The Spring API (8081) and Next.js (3000) run on the host with hot reload.
 # Credentials here are dev-only. Production values live in AWS SSM Parameter Store.
 
@@ -40,6 +40,19 @@ services:
       - "8025:8025"
       - "1025:1025"
 
+  # S3-compatible stand-in for AWS S3. Chosen over LocalStack (needs an auth token since 2026.03)
+  # and MinIO (community edition discontinued). It does not verify presigned-URL signatures, so
+  # signature/expiry behaviour is only proven against real S3.
+  s3mock:
+    image: adobe/s3mock:5.2.3
+    environment:
+      COM_ADOBE_TESTING_S3MOCK_STORE_INITIAL_BUCKETS: lms-media-local
+      COM_ADOBE_TESTING_S3MOCK_STORE_RETAIN_FILES_ON_EXIT: "true"
+    ports:
+      - "9090:9090"
+    volumes:
+      - s3data:/s3mockroot
+
   keycloak:
     image: quay.io/keycloak/keycloak:26.4
     command: ["start-dev", "--import-realm"]
@@ -63,3 +76,4 @@ services:
 
 volumes:
   pgdata:
+  s3data:

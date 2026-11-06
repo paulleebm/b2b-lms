@@ -44,6 +44,21 @@ lms:
     realm: ${KEYCLOAK_REALM:lms}
     admin-client-id: ${KEYCLOAK_ADMIN_CLIENT_ID:lms-admin}
     admin-client-secret: ${KEYCLOAK_ADMIN_CLIENT_SECRET:lms-admin-dev-secret}
+    web-client-id: ${KEYCLOAK_WEB_CLIENT_ID:lms-web}
+    app-url: ${APP_URL:http://localhost:3000}
+  storage:
+    bucket: ${S3_BUCKET:lms-media-local}
+    region: ${AWS_REGION:ap-northeast-2}
+    # Empty in AWS (the SDK resolves the regional endpoint and the ECS task role).
+    # Locally: S3Mock, with path-style URLs and dummy credentials.
+    endpoint: ${S3_ENDPOINT:http://localhost:9090}
+    single-part-max-bytes: 104857600      # <= 100 MiB: one presigned PUT; above: multipart
+    part-size-bytes: 16777216             # 16 MiB parts (S3 minimum is 5 MiB, max 10,000 parts)
+    upload-url-ttl: 15m
+    download-url-ttl: 5m
+  media:
+    transcoder: ${VIDEO_TRANSCODER:fake}  # fake (local) | mediaconvert (AWS, see docs/05)
+    fake-transcode-delay: 3s
 
 management:
   endpoints:

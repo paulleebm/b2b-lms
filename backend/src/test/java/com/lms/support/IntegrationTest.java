@@ -26,6 +26,7 @@ public abstract class IntegrationTest {
     @DynamicPropertySource
     static void database(DynamicPropertyRegistry registry) {
         PostgresContainer.register(registry);
+        S3MockContainer.register(registry);
     }
 
     /** A user who is not acting for any company yet (no organization claim). */

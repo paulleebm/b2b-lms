@@ -16,6 +16,7 @@ public final class TenantContext {
 
     private static final ThreadLocal<UUID> TENANT = new ThreadLocal<>();
     private static final ThreadLocal<UUID> USER = new ThreadLocal<>();
+    private static final ThreadLocal<UUID> MEMBERSHIP = new ThreadLocal<>();
 
     private TenantContext() {
     }
@@ -37,14 +38,33 @@ public final class TenantContext {
         return Optional.ofNullable(USER.get());
     }
 
+    /** The caller's membership in the current tenant (who owns a course, who invited whom). */
+    public static Optional<UUID> membershipId() {
+        return Optional.ofNullable(MEMBERSHIP.get());
+    }
+
+    public static UUID requireMembershipId() {
+        UUID id = MEMBERSHIP.get();
+        if (id == null) {
+            throw new IllegalStateException("No membership in context");
+        }
+        return id;
+    }
+
     public static void set(UUID tenantId, UUID userId) {
+        set(tenantId, userId, null);
+    }
+
+    public static void set(UUID tenantId, UUID userId, UUID membershipId) {
         TENANT.set(tenantId);
         USER.set(userId);
+        MEMBERSHIP.set(membershipId);
     }
 
     public static void clear() {
         TENANT.remove();
         USER.remove();
+        MEMBERSHIP.remove();
     }
 
     /**

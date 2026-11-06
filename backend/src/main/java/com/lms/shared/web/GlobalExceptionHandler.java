@@ -34,7 +34,17 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
 
     @ExceptionHandler(ApiException.class)
     ResponseEntity<ProblemDetail> handleApi(ApiException ex) {
-        return problem(ex.status(), ex.code(), ex.getMessage());
+        ResponseEntity<ProblemDetail> response = problem(ex.status(), ex.code(), ex.getMessage());
+        if (!ex.errors().isEmpty()) {
+            response.getBody().setProperty("errors", ex.errors());
+        }
+        return response;
+    }
+
+    /** Two writers raced on the same row; the @Version check let only the first one through. */
+    @ExceptionHandler(org.springframework.dao.OptimisticLockingFailureException.class)
+    ResponseEntity<ProblemDetail> handleOptimisticLock(RuntimeException ex) {
+        return problem(HttpStatus.CONFLICT, "CONCURRENT_UPDATE", "다른 사용자가 먼저 수정했습니다. 새로고침 후 다시 시도하세요.");
     }
 
     @ExceptionHandler(AuthenticationException.class)

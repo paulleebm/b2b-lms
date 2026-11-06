@@ -43,6 +43,10 @@ dependencies {
     // Modular monolith boundaries (event publication registry / outbox is added on Day 4)
     implementation("org.springframework.modulith:spring-modulith-starter-core")
 
+    // Object storage: AWS SDK v2 (S3 + presigner). Locally it talks to Adobe S3Mock instead of AWS.
+    implementation(platform("software.amazon.awssdk:bom:2.46.7"))
+    implementation("software.amazon.awssdk:s3")
+
     implementation("org.springframework.boot:spring-boot-starter-actuator")
 
     testImplementation("org.springframework.boot:spring-boot-starter-webmvc-test")

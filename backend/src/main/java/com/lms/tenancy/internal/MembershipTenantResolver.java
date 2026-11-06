@@ -3,8 +3,11 @@ package com.lms.tenancy.internal;
 import com.lms.shared.TenantContext;
 import com.lms.shared.security.TenantResolver;
 import com.lms.shared.web.ApiException;
+import com.lms.tenancy.MemberJoined;
+import java.time.Instant;
 import java.util.Optional;
 import java.util.UUID;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.stereotype.Component;
@@ -29,13 +32,16 @@ class MembershipTenantResolver implements TenantResolver {
     private final TenantRepository tenants;
     private final MembershipRepository memberships;
     private final TransactionTemplate tx;
+    private final ApplicationEventPublisher events;
 
     MembershipTenantResolver(AppUserRepository users, TenantRepository tenants,
-                             MembershipRepository memberships, PlatformTransactionManager txManager) {
+                             MembershipRepository memberships, PlatformTransactionManager txManager,
+                             ApplicationEventPublisher events) {
         this.users = users;
         this.tenants = tenants;
         this.memberships = memberships;
         this.tx = new TransactionTemplate(txManager);
+        this.events = events;
     }
 
     @Override
@@ -44,19 +50,28 @@ class MembershipTenantResolver implements TenantResolver {
 
         Optional<String> alias = OrganizationClaim.selectedAlias(jwt);
         if (alias.isEmpty()) {
-            return new ResolvedPrincipal(user.getId(), null, null);
+            return new ResolvedPrincipal(user.getId(), null, null, null);
         }
 
         Tenant tenant = tenants.findBySlug(alias.get())
                 .orElseThrow(() -> ApiException.forbidden("TENANT_NOT_REGISTERED", "등록되지 않은 회사입니다."));
 
-        Membership membership = TenantContext.callAs(tenant.getId(),
-                () -> tx.execute(status -> memberships.findByUserId(user.getId()).orElse(null)));
+        Membership membership = TenantContext.callAs(tenant.getId(), () -> tx.execute(status -> {
+            Membership m = memberships.findByUserId(user.getId()).orElse(null);
+            // First sign-in after an invitation: the token proves Keycloak put this person in the
+            // organization, so the invitation is accepted. Conditional update = exactly once.
+            if (m != null && m.getStatus() == Membership.Status.INVITED
+                    && memberships.activateIfInvited(m.getId(), Instant.now()) == 1) {
+                events.publishEvent(new MemberJoined(tenant.getId(), m.getId(), m.getDepartmentId()));
+                return memberships.findById(m.getId()).orElseThrow();
+            }
+            return m;
+        }));
 
         if (membership == null || membership.getStatus() != Membership.Status.ACTIVE) {
             throw ApiException.forbidden("NOT_A_MEMBER", "이 회사의 활성 멤버가 아닙니다.");
         }
-        return new ResolvedPrincipal(user.getId(), tenant.getId(), membership.getRole().name());
+        return new ResolvedPrincipal(user.getId(), tenant.getId(), membership.getId(), membership.getRole().name());
     }
 
     /** Just-in-time user creation, safe against two first requests racing each other. */
