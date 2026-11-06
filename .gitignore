@@ -1,0 +1,45 @@
+# OS / editors
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+*.iml
+
+# Local tool state
+.omc/
+
+# Env files (never commit secrets)
+.env
+.env.*
+!.env.example
+
+# Backend (Gradle)
+backend/.gradle/
+backend/build/
+backend/bin/
+backend/out/
+
+# Frontend (pnpm / Next.js / Storybook)
+node_modules/
+.next/
+out/
+storybook-static/
+*.tsbuildinfo
+.turbo/
+
+# Terraform
+.terraform/
+*.tfstate
+*.tfstate.*
+*.tfvars
+!*.tfvars.example
+
+# node_modules that some agent skills ship for local tooling
+.claude/skills/**/node_modules/
+
+# stageshow skill: kept locally, not published (bundles third-party brand logos)
+.claude/skills/stageshow/
+skills-lock.json
+
+# Personal local test account (only exists in this machine's Keycloak volume)
+infra/local/dev-accounts.md

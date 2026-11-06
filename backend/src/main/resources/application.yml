@@ -1,0 +1,64 @@
+server:
+  port: 8081
+
+spring:
+  application:
+    name: lms-api
+  threads:
+    virtual:
+      enabled: true          # I/O-bound server: wait on DB/HTTP without tying up platform threads
+  mvc:
+    problemdetails:
+      enabled: true          # RFC 9457 error bodies for framework errors too
+  jpa:
+    open-in-view: false      # no lazy loading during response rendering -> queries stay inside the service layer
+    hibernate:
+      ddl-auto: validate     # Flyway owns the schema; Hibernate only checks entities match it
+    properties:
+      hibernate:
+        jdbc:
+          time_zone: UTC
+  datasource:
+    # The app connects as lms_app: not the table owner, no BYPASSRLS -> Postgres RLS applies.
+    url: ${DB_URL:jdbc:postgresql://localhost:5432/lms}
+    username: ${DB_APP_USER:lms_app}
+    password: ${DB_APP_PASSWORD:lms_app_dev}
+  flyway:
+    # Migrations run as the owner. In AWS this is a separate one-off ECS task, so it is off there.
+    enabled: ${FLYWAY_ENABLED:true}
+    user: ${DB_OWNER_USER:lms_owner}
+    password: ${DB_OWNER_PASSWORD:lms_owner_dev}
+  data:
+    redis:
+      url: ${REDIS_URL:redis://localhost:6379}
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: ${KEYCLOAK_ISSUER:http://localhost:8080/realms/lms}
+          audiences: lms-api
+
+lms:
+  keycloak:
+    base-url: ${KEYCLOAK_BASE_URL:http://localhost:8080}
+    realm: ${KEYCLOAK_REALM:lms}
+    admin-client-id: ${KEYCLOAK_ADMIN_CLIENT_ID:lms-admin}
+    admin-client-secret: ${KEYCLOAK_ADMIN_CLIENT_SECRET:lms-admin-dev-secret}
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health      # only health is exposed; everything else stays internal
+  endpoint:
+    health:
+      probes:
+        enabled: true
+
+springdoc:
+  swagger-ui:
+    enabled: ${SWAGGER_UI_ENABLED:true}
+
+logging:
+  pattern:
+    level: "%5p [trace=%X{traceId:-}] [tenant=%X{tenantId:-}]"

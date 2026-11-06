@@ -1,0 +1,15 @@
+spring:
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          # Never contacted: tests inject validated JWTs directly. Set so the decoder bean can be built.
+          issuer-uri: http://localhost:65535/realms/test
+  data:
+    redis:
+      url: redis://localhost:65535
+
+management:
+  health:
+    redis:
+      enabled: false
