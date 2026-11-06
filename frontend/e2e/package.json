@@ -4,7 +4,8 @@
   "private": true,
   "description": "End-to-end test against the running local stack (docker compose + API + web) with seeded demo data.",
   "scripts": {
-    "test": "playwright test"
+    "test": "playwright test",
+    "screenshots": "playwright test --config playwright.screenshots.config.ts"
   },
   "devDependencies": {
     "@playwright/test": "1.65.0",

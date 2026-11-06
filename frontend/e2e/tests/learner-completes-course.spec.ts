@@ -1,24 +1,15 @@
-import { expect, test, type Page } from "@playwright/test";
+import { expect, test } from "@playwright/test";
+
+import { signIn } from "../support/auth";
 
 /**
  * Scenario 6–7 as a learner would do it: sign in (email-first Keycloak login) → "내 교육" →
  * finish the remaining lessons → pass the quiz → the seal. Uses the seeded demo company
  * (docs: --lms.seed=true). Each run completes one more unfinished course of the account.
  */
-const PASSWORD = "Demo-2026-lms";
 // Not learner@: that account is kept for the live demo. This one starts with two untouched
 // courses, so two runs complete both; then re-seed (README) or point E2E_LEARNER elsewhere.
 const LEARNER = process.env.E2E_LEARNER ?? "dohyun.yoon@demo-elec.test";
-
-async function signIn(page: Page, email: string) {
-  await page.goto("/app");
-  // Keycloak's login theme: email first, then the password on the next page.
-  await page.locator('input[name="username"]').fill(email);
-  await page.locator('[type="submit"]').first().click();
-  await page.locator('input[name="password"]').fill(PASSWORD);
-  await page.locator('[type="submit"]').first().click();
-  await expect(page).toHaveURL(/localhost:3000\/app$/);
-}
 
 test("학습자가 남은 레슨을 마치고 퀴즈를 통과해 수료한다", async ({ page }) => {
   await signIn(page, LEARNER);

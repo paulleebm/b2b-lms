@@ -17,7 +17,7 @@
   </tr>
 </table>
 
-<sub>화면의 회사·사람·수치는 모두 합성 데이터입니다.</sub>
+<sub>실행 중인 앱에서 데모 시드 데이터로 찍은 화면입니다(`cd frontend/e2e && pnpm screenshots`). 회사·사람·수치는 모두 합성 데이터입니다.</sub>
 
 ---
 
@@ -108,7 +108,7 @@ AWS 배포 설계(ECS Fargate, RDS, ElastiCache, SQS, S3/CloudFront, MediaConver
 
 | 범위 | 개수 | 무엇을 증명하나 |
 |---|---|---|
-| 백엔드 (`./gradlew test`) | 80 | 회사 간 접근 차단(404), RLS가 직접 SQL도 차단, 커넥션 풀 누수 없음, 모든 테넌트 테이블에 RLS 강제, 모듈 경계, 초대 사가, 동시 편집(ETag), 업로드, 배정 멱등성, 인정 시간 경계값, 퀴즈 채점, 아웃박스 → 워커 → PDF·메일, 대시보드 캐시, 감사 로그, 영상 변환 이벤트 |
+| 백엔드 (`./gradlew test`) | 82 | 회사 간 접근 차단(404), RLS가 직접 SQL도 차단, 커넥션 풀 누수 없음, 모든 테넌트 테이블에 RLS 강제, 모듈 경계, 초대 사가, 동시 편집(ETag), 업로드, 배정 멱등성, 인정 시간 경계값, 퀴즈 채점, 아웃박스 → 워커 → PDF·메일, 대시보드 캐시, 감사 로그, 영상 변환 이벤트 |
 | 디자인 시스템 (`pnpm --filter @lms/ui test`) | 98 | 모든 스토리를 Chromium에서 실행: 상호작용(`play`) + axe 접근성 검사 |
 | E2E (Playwright) | 2 | 로그인(Keycloak) → 레슨 → 퀴즈 → 수료, 관리자 대시보드. 목 없이 로컬 스택 전체 |
 | 토큰 대비 (`pnpm --filter @lms/ui check:contrast`) | 28쌍 | DESIGN.md가 쓰는 모든 색 조합이 WCAG 2.2 AA |

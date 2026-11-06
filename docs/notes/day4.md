@@ -19,7 +19,7 @@
 [MediaConvert] 작업 완료·실패 ─ EventBridge 규칙 ─ SQS(lms-transcode) ─ 워커 → 영상 READY(HLS) / FAILED
 [대시보드] JdbcClient 집계 SQL ─ @Cacheable(회사 ID 키, Redis 60초) ─ 수료·배정 커밋 후 캐시 비움
 [감사 로그] 도메인 이벤트 구독 → audit_log (INSERT·SELECT 권한만)
-[진위 확인] /verify/{수료번호} ─ verify_certificate() SECURITY DEFINER 함수 ─ 이름 가림("하**김")
+[진위 확인] /verify/{수료번호} ─ verify_certificate() SECURITY DEFINER 함수 ─ 이름 가림("김*나")
 ```
 
 | 위치 | 파일 | 역할 |
@@ -82,7 +82,7 @@
 
 - 수료증을 받은 회사(외부 기관, 채용 담당자)는 로그인하지 않고 `/verify/LMS-2026-XXXXXXXX`로 확인한다.
 - 문제: 로그인이 없으면 회사 컨텍스트가 없고, RLS 때문에 아무 행도 안 보인다. RLS를 끄면 격리가 깨진다.
-- 해결: **`verify_certificate(serial)` 함수 하나만 `SECURITY DEFINER`**로 만들었다. 수료번호가 정확히 일치하는 한 건만, **필요한 열만, 이름은 가려서**("하**김") 돌려준다. 앱 계정은 이 함수 실행 권한만 받는다. 표 전체를 훑을 방법이 없다.
+- 해결: **`verify_certificate(serial)` 함수 하나만 `SECURITY DEFINER`**로 만들었다. 수료번호가 정확히 일치하는 한 건만, **필요한 열만, 이름은 가려서**("김*나") 돌려준다. 앱 계정은 이 함수 실행 권한만 받는다. 표 전체를 훑을 방법이 없다.
 - 수료번호는 Crockford Base32 8자(약 1조 가지) 난수라서 순서대로 넣어 보는 공격이 사실상 불가능하다. 운영이라면 IP별 요청 제한을 붙인다.
 
 ## 5. 메일: 배정 안내, 리마인더, 수료 축하
