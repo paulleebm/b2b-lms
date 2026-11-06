@@ -1,0 +1,16 @@
+{
+  "name": "lms-frontend",
+  "private": true,
+  "packageManager": "pnpm@10.34.9",
+  "engines": {
+    "node": ">=22.12"
+  },
+  "scripts": {
+    "dev": "pnpm --filter web dev",
+    "build": "pnpm -r build",
+    "lint": "pnpm -r lint",
+    "typecheck": "pnpm -r typecheck",
+    "storybook": "pnpm --filter @lms/ui storybook",
+    "build-storybook": "pnpm --filter @lms/ui build-storybook"
+  }
+}
