@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { BookOpen, House, UsersRound } from "lucide-react";
+import { BookOpen, Building2, ClipboardList, GraduationCap, LayoutDashboard, ScrollText, UsersRound } from "lucide-react";
 import { AppShell, type NavSection } from "@lms/ui";
 
 /**
@@ -12,19 +12,39 @@ import { AppShell, type NavSection } from "@lms/ui";
  * Hiding a menu is convenience, not security: the API checks the role on every call.
  */
 function navFor(role: string | null): NavSection[] {
-  const home: NavSection = { items: [{ href: "/app", label: "홈", icon: House }] };
+  const home: NavSection = { items: [{ href: "/app", label: "내 교육", icon: GraduationCap }] };
   switch (role) {
     case "ORG_ADMIN":
       return [
         home,
-        { label: "조직", items: [{ href: "/app/members", label: "멤버", icon: UsersRound }] },
-        { label: "교육", items: [{ href: "/app/studio", label: "코스 스튜디오", icon: BookOpen }] },
+        {
+          label: "조직",
+          items: [
+            { href: "/app/members", label: "멤버", icon: UsersRound },
+            { href: "/app/departments", label: "부서", icon: Building2 },
+            { href: "/app/audit", label: "감사 로그", icon: ScrollText },
+          ],
+        },
+        {
+          label: "교육",
+          items: [
+            { href: "/app/dashboard", label: "교육 현황", icon: LayoutDashboard },
+            { href: "/app/assignments", label: "교육 배정", icon: ClipboardList },
+            { href: "/app/studio", label: "코스 스튜디오", icon: BookOpen },
+          ],
+        },
       ];
     case "INSTRUCTOR":
       return [home, { label: "교육", items: [{ href: "/app/studio", label: "내 코스", icon: BookOpen }] }];
     default:
       return [home];
   }
+}
+
+/** "내 교육" stays highlighted inside a course and its lessons. */
+function isCurrent(href: string, pathname: string): boolean {
+  if (href === "/app") return pathname === "/app" || pathname.startsWith("/app/learn/");
+  return pathname === href || pathname.startsWith(`${href}/`);
 }
 
 export function AppFrame({
@@ -43,7 +63,7 @@ export function AppFrame({
     ...s,
     items: s.items.map((i) => ({
       ...i,
-      current: i.href === "/app" ? pathname === "/app" : pathname === i.href || pathname.startsWith(`${i.href}/`),
+      current: isCurrent(i.href, pathname),
     })),
   }));
   return (

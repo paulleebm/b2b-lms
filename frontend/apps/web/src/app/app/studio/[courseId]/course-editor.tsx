@@ -29,13 +29,15 @@ import { ClientApiError, api, describeError } from "@/lib/client-api";
 import { courseStatus } from "@/lib/labels";
 import { UploadCanceled, startUpload, type UploadHandle } from "@/lib/upload";
 
+import { QuizEditor } from "./quiz-editor";
+
 /**
  * Course editor wired to the API one change at a time. Every write sends the last ETag as
  * If-Match and gets the whole course back with a new one; a 412 means someone else changed the
  * course first — the local edits stay on screen and the person decides when to reload.
  */
 type PublishProblem = { code: string; message: string; sectionId?: string | null; lessonId?: string | null };
-type Problem = { title: string; detail?: string; traceId?: string };
+type Problem = { title: string; detail?: string; traceId?: string; items?: string[] };
 
 const VIDEO_TYPES = "video/mp4,video/quicktime,video/webm";
 const DOCUMENT_TYPES =
@@ -122,7 +124,12 @@ export function CourseEditor({ initial, initialEtag }: { initial: CourseDetail; 
       } else if (error instanceof ClientApiError && error.code === "COURSE_NOT_READY") {
         setPublishProblems((error.problem.errors ?? []) as PublishProblem[]);
       } else {
-        setProblem(describeError(error));
+        // Validation problems (e.g. an invalid quiz) come back as a list: show each one.
+        const items =
+          error instanceof ClientApiError
+            ? (error.problem.errors ?? []).map((x) => String(x.message ?? "")).filter(Boolean)
+            : [];
+        setProblem({ ...describeError(error), items });
       }
       return null;
     } finally {
@@ -320,6 +327,13 @@ export function CourseEditor({ initial, initialEtag }: { initial: CourseDetail; 
         {problem ? (
           <Notice tone="danger" title={problem.title}>
             {problem.detail}
+            {problem.items?.length ? (
+              <ul className="mt-1 list-disc pl-5">
+                {problem.items.map((item) => (
+                  <li key={item}>{item}</li>
+                ))}
+              </ul>
+            ) : null}
             {problem.traceId ? <span className="block text-caption text-muted">추적 ID {problem.traceId}</span> : null}
           </Notice>
         ) : null}
@@ -458,6 +472,15 @@ export function CourseEditor({ initial, initialEtag }: { initial: CourseDetail; 
             </PanelBody>
           </Panel>
         </div>
+
+        {/* Keyed by revision: a save (or a reload after a conflict) shows what the server stored. */}
+        <QuizEditor
+          key={course.quiz?.revision ?? "none"}
+          quiz={course.quiz}
+          editable={editable}
+          onSave={(body) => write("PUT", "/quiz", body, "퀴즈를 저장했습니다.")}
+          onDelete={() => write("DELETE", "/quiz", undefined, "퀴즈를 삭제했습니다.")}
+        />
       </div>
     </>
   );

@@ -12,8 +12,9 @@ import { getSession } from "@/server/session";
  * our own Origin. A form or fetch from another site cannot pass both.
  */
 const SEGMENT = /^[A-Za-z0-9_-]+$/;
-const REQUEST_HEADERS = ["content-type", "if-match", "accept"];
-const RESPONSE_HEADERS = ["content-type", "etag"];
+const REQUEST_HEADERS = ["content-type", "if-match", "accept", "idempotency-key"];
+// set-cookie: CloudFront signed cookies for HLS (AWS), set by the API's lesson launch response.
+const RESPONSE_HEADERS = ["content-type", "etag", "idempotent-replayed", "set-cookie"];
 
 function problem(status: number, code: string, detail: string) {
   return NextResponse.json(

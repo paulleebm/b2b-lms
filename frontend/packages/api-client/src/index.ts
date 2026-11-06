@@ -45,3 +45,29 @@ export interface ProblemDetails {
   /** Field errors (VALIDATION_FAILED) or publish problems (COURSE_NOT_READY). */
   errors?: Array<Record<string, unknown>>;
 }
+
+// Day 3: learning
+export type QuizView = S["QuizView"];
+export type QuizQuestionView = S["QuestionView"];
+export type QuizRequest = S["QuizRequest"];
+export type MyEnrollment = S["MyEnrollment"];
+export type EnrollmentDetail = S["EnrollmentDetail"];
+export type LessonState = S["LessonState"];
+export type QuizState = S["QuizState"];
+export type LessonContent = S["LessonContent"];
+export type ProgressResult = S["ProgressResult"];
+export type AttemptView = S["AttemptView"];
+export type SubmitResult = S["SubmitResult"];
+export type AssignmentView = S["AssignmentView"];
+export type AssignRequest = S["AssignRequest"];
+export type AssignResult = S["AssignResult"];
+
+// Day 4: dashboard, certificates, audit
+export type Dashboard = S["Dashboard"];
+export type DashboardKpi = S["Kpi"];
+export type DashboardGroupRow = S["GroupRow"];
+export type DashboardPendingRow = S["PendingRow"];
+export type ReminderResult = S["ReminderResult"];
+export type CertificateLink = S["CertificateLink"];
+export type CertificateVerification = S["Verification"];
+export type AuditEntry = S["AuditEntry"];

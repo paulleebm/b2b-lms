@@ -4,6 +4,38 @@
  */
 
 export interface paths {
+    "/v1/assignments": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["list_2"];
+        put?: never;
+        post: operations["assign"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/audit-log": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["recent"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/v1/courses": {
         parameters: {
             query?: never;
@@ -100,6 +132,22 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/v1/courses/{id}/quiz": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put: operations["saveQuiz"];
+        post?: never;
+        delete: operations["deleteQuiz"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/v1/courses/{id}/sections": {
         parameters: {
             query?: never;
@@ -158,6 +206,22 @@ export interface paths {
         get?: never;
         put?: never;
         post: operations["unpublish"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/dashboard": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["load"];
+        put?: never;
+        post?: never;
         delete?: never;
         options?: never;
         head?: never;
@@ -251,7 +315,7 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        get: operations["list_2"];
+        get: operations["list_3"];
         put?: never;
         post?: never;
         delete?: never;
@@ -274,6 +338,166 @@ export interface paths {
         options?: never;
         head?: never;
         patch: operations["update"];
+        trace?: never;
+    };
+    "/v1/my/enrollments": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["myEnrollments"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/my/enrollments/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["detail"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/my/enrollments/{id}/certificate": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["mine"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/my/enrollments/{id}/lessons/{lessonId}/complete": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["complete_1"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/my/enrollments/{id}/lessons/{lessonId}/launch": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["launch"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/my/enrollments/{id}/lessons/{lessonId}/progress": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put: operations["heartbeat"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/my/enrollments/{id}/quiz/attempts": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["startQuiz"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/my/enrollments/{id}/quiz/attempts/{attemptId}/submit": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["submit"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/public/certificates/{serial}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["verify"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/reminders": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["remind"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
         trace?: never;
     };
     "/v1/tenants": {
@@ -372,6 +596,22 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/v1/xapi/statements": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["statements"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
 }
 export type webhooks = Record<string, never>;
 export interface components {
@@ -380,6 +620,79 @@ export interface components {
             title: string;
             /** @enum {string} */
             type: "VIDEO" | "DOCUMENT" | "TEXT";
+        };
+        AssignRequest: {
+            /** Format: uuid */
+            courseId: string;
+            departmentIds?: string[];
+            /** Format: date-time */
+            dueAt?: string;
+            membershipIds?: string[];
+        };
+        AssignResult: {
+            assignmentIds: string[];
+            /** Format: int32 */
+            created: number;
+            /** Format: int32 */
+            existing: number;
+            /** Format: int32 */
+            notActive: number;
+            /** Format: int32 */
+            targeted: number;
+        };
+        AssignmentView: {
+            /** Format: int64 */
+            courseCompleted: number;
+            /** Format: int64 */
+            courseEnrolled: number;
+            /** Format: uuid */
+            courseId: string;
+            courseTitle: string;
+            /** Format: date-time */
+            createdAt: string;
+            /** Format: date-time */
+            dueAt: string | null;
+            /** Format: uuid */
+            id: string;
+            /** Format: uuid */
+            targetId: string;
+            targetName: string | null;
+            /** @enum {string} */
+            targetType: "DEPARTMENT" | "MEMBER";
+        };
+        AttemptView: {
+            /** Format: int32 */
+            attemptNumber: number;
+            /** Format: date-time */
+            deadlineAt: string | null;
+            /** Format: uuid */
+            id: string;
+            /** Format: int32 */
+            maxAttempts: number | null;
+            /** Format: int32 */
+            passScore: number;
+            questions: components["schemas"]["QuestionForLearner"][];
+            /** Format: date-time */
+            startedAt: string;
+        };
+        AuditEntry: {
+            action: string;
+            actorName: string | null;
+            /** Format: date-time */
+            at: string;
+            /** Format: uuid */
+            id: string;
+            metadata: components["schemas"]["JsonNode"];
+            /** Format: uuid */
+            targetId: string | null;
+            targetType: string;
+            traceId: string | null;
+        };
+        CertificateLink: {
+            /** Format: date-time */
+            issuedAt: string;
+            serial: string;
+            url: string;
         };
         CompleteResult: {
             /** Format: uuid */
@@ -403,6 +716,7 @@ export interface components {
             ownerName: string | null;
             /** Format: date-time */
             publishedAt: string | null;
+            quiz: components["schemas"]["QuizView"] | null;
             sections: components["schemas"]["SectionView"][];
             /** @enum {string} */
             status: "DRAFT" | "PUBLISHED" | "ARCHIVED";
@@ -443,12 +757,27 @@ export interface components {
             name: string;
             slug: string;
         };
+        Dashboard: {
+            courses: components["schemas"]["GroupRow"][];
+            departments: components["schemas"]["GroupRow"][];
+            /** Format: date-time */
+            generatedAt: string;
+            kpi: components["schemas"]["Kpi"];
+            pending: components["schemas"]["PendingRow"][];
+        };
         DepartmentResponse: {
             /** Format: date-time */
             createdAt: string;
             /** Format: uuid */
             id: string;
             name: string;
+        };
+        DocumentContent: {
+            contentType: string;
+            fileName: string;
+            /** Format: int64 */
+            sizeBytes: number;
+            url: string;
         };
         DocumentSummary: {
             available: boolean;
@@ -464,6 +793,46 @@ export interface components {
             expiresAt: string;
             /** Format: url */
             url: string;
+        };
+        EnrollmentDetail: {
+            certificateSerial: string | null;
+            /** Format: date-time */
+            completedAt: string | null;
+            /** Format: uuid */
+            courseId: string;
+            description: string;
+            /** Format: date-time */
+            dueAt: string | null;
+            /** Format: uuid */
+            id: string;
+            /** Format: int32 */
+            lessonsDone: number;
+            /** Format: int32 */
+            lessonsTotal: number;
+            nextLesson: components["schemas"]["LessonRef"] | null;
+            overdue: boolean;
+            quiz: components["schemas"]["QuizState"] | null;
+            sections: components["schemas"]["SectionState"][];
+            /** @enum {string} */
+            status: "NOT_STARTED" | "IN_PROGRESS" | "COMPLETED";
+            title: string;
+        };
+        GroupRow: {
+            /** Format: int64 */
+            completed: number;
+            /** Format: int32 */
+            completionRate: number;
+            /** Format: int64 */
+            enrolled: number;
+            /** Format: uuid */
+            id: string | null;
+            name: string;
+            /** Format: int64 */
+            overdue: number;
+        };
+        HeartbeatRequest: {
+            /** Format: int32 */
+            positionSec?: number;
         };
         InitResult: {
             /** Format: date-time */
@@ -505,6 +874,82 @@ export interface components {
             message: string | null;
             /** @enum {string} */
             outcome: "INVITED" | "ALREADY_MEMBER" | "FAILED";
+        };
+        JsonNode: {
+            array: boolean;
+            bigDecimal: boolean;
+            bigInteger: boolean;
+            binary: boolean;
+            boolean: boolean;
+            container: boolean;
+            double: boolean;
+            embeddedValue: boolean;
+            empty: boolean;
+            float: boolean;
+            floatingPointNumber: boolean;
+            int: boolean;
+            integralNumber: boolean;
+            long: boolean;
+            missingNode: boolean;
+            /** @enum {string} */
+            nodeType: "ARRAY" | "BINARY" | "BOOLEAN" | "MISSING" | "NULL" | "NUMBER" | "OBJECT" | "POJO" | "STRING";
+            null: boolean;
+            number: boolean;
+            object: boolean;
+            pojo: boolean;
+            short: boolean;
+            string: boolean;
+            /** @deprecated */
+            textual: boolean;
+            valueNode: boolean;
+        };
+        Kpi: {
+            /** Format: int64 */
+            activeMembers: number;
+            /** Format: int64 */
+            completed: number;
+            /** Format: int32 */
+            completionRate: number;
+            /** Format: int64 */
+            dueSoon: number;
+            /** Format: int64 */
+            enrolled: number;
+            /** Format: int64 */
+            inProgress: number;
+            /** Format: int64 */
+            notStarted: number;
+            /** Format: int64 */
+            overdue: number;
+        };
+        LessonContent: {
+            body: string | null;
+            completed: boolean;
+            document: components["schemas"]["DocumentContent"] | null;
+            /** Format: uuid */
+            id: string;
+            /** Format: int32 */
+            lastPositionSec: number;
+            next: components["schemas"]["LessonRef"] | null;
+            previous: components["schemas"]["LessonRef"] | null;
+            title: string;
+            type: string;
+            video: components["schemas"]["VideoContent"] | null;
+            /** Format: int32 */
+            watchedSec: number;
+        };
+        LessonRef: {
+            /** Format: uuid */
+            id: string;
+            title: string;
+        };
+        LessonState: {
+            completed: boolean;
+            /** Format: uuid */
+            id: string;
+            /** Format: int32 */
+            percent: number | null;
+            title: string;
+            type: string;
         };
         LessonView: {
             body: string | null;
@@ -553,6 +998,31 @@ export interface components {
             /** Format: uuid */
             tenantId: string;
         };
+        MyEnrollment: {
+            certificateSerial: string | null;
+            /** Format: date-time */
+            completedAt: string | null;
+            /** Format: uuid */
+            courseId: string;
+            description: string;
+            /** Format: date-time */
+            dueAt: string | null;
+            /** Format: uuid */
+            id: string;
+            /** Format: int32 */
+            lessonsDone: number;
+            /** Format: int32 */
+            lessonsTotal: number;
+            nextLesson: components["schemas"]["LessonRef"] | null;
+            overdue: boolean;
+            /** @enum {string} */
+            status: "NOT_STARTED" | "IN_PROGRESS" | "COMPLETED";
+            title: string;
+        };
+        Option: {
+            id: string;
+            text: string;
+        };
         OutlineEntry: {
             /** Format: uuid */
             id: string;
@@ -578,16 +1048,157 @@ export interface components {
         PartUrlsResponse: {
             parts: components["schemas"]["PartUrl"][];
         };
+        PendingRow: {
+            /** Format: uuid */
+            courseId: string;
+            courseTitle: string;
+            departmentName: string | null;
+            /** Format: date-time */
+            dueAt: string | null;
+            email: string;
+            /** Format: uuid */
+            enrollmentId: string;
+            /** Format: int64 */
+            lessonsDone: number;
+            /** Format: int64 */
+            lessonsTotal: number;
+            memberName: string;
+            overdue: boolean;
+            /** Format: date-time */
+            remindedAt: string | null;
+            status: string;
+        };
+        ProgressResult: {
+            certificateSerial: string | null;
+            completed: boolean;
+            courseCompleted: boolean;
+            /** Format: int32 */
+            durationSeconds: number | null;
+            /** Format: int32 */
+            percent: number | null;
+            /** Format: int32 */
+            watchedSec: number;
+        };
+        QuestionForLearner: {
+            /** Format: uuid */
+            id: string;
+            options: components["schemas"]["Option"][];
+            /** Format: int32 */
+            points: number;
+            prompt: string;
+            type: string;
+        };
+        QuestionOutcome: {
+            correct: boolean;
+            /** Format: uuid */
+            questionId: string;
+        };
+        QuestionRequest: {
+            correct: number[];
+            options: string[];
+            /** Format: int32 */
+            points?: number;
+            prompt: string;
+            /** @enum {string} */
+            type: "SINGLE" | "MULTIPLE";
+        };
+        QuestionView: {
+            answer: string[];
+            /** Format: uuid */
+            id: string;
+            options: components["schemas"]["Option"][];
+            /** Format: int32 */
+            points: number;
+            prompt: string;
+            /** @enum {string} */
+            type: "SINGLE" | "MULTIPLE";
+        };
+        QuizRequest: {
+            /** Format: int32 */
+            maxAttempts?: number;
+            /** Format: int32 */
+            passScore?: number;
+            questions: components["schemas"]["QuestionRequest"][];
+            /** Format: int32 */
+            timeLimitSec?: number;
+        };
+        QuizState: {
+            /** Format: int32 */
+            attemptsUsed: number;
+            /** Format: int32 */
+            bestScore: number | null;
+            /** Format: int32 */
+            maxAttempts: number | null;
+            /** Format: uuid */
+            openAttemptId: string | null;
+            /** Format: int32 */
+            passScore: number;
+            passed: boolean;
+            /** Format: int32 */
+            questionCount: number;
+            /** Format: int32 */
+            timeLimitSec: number | null;
+            unlocked: boolean;
+        };
+        QuizView: {
+            /** Format: int32 */
+            maxAttempts: number | null;
+            /** Format: int32 */
+            passScore: number;
+            questions: components["schemas"]["QuestionView"][];
+            /** Format: int32 */
+            revision: number;
+            /** Format: int32 */
+            timeLimitSec: number | null;
+        };
         RegisterTenantRequest: {
             domain: string;
             name: string;
             slug: string;
+        };
+        RemindRequest: {
+            /** Format: uuid */
+            courseId?: string | null;
+            enrollmentIds?: (string | null)[] | null;
+        };
+        ReminderResult: {
+            /** Format: int32 */
+            queued: number;
+        };
+        SectionState: {
+            /** Format: uuid */
+            id: string;
+            lessons: components["schemas"]["LessonState"][];
+            title: string;
         };
         SectionView: {
             /** Format: uuid */
             id: string;
             lessons: components["schemas"]["LessonView"][];
             title: string;
+        };
+        StatementResult: {
+            statements: components["schemas"]["JsonNode"][];
+        };
+        SubmitRequest: {
+            answers: {
+                [key: string]: string[];
+            };
+        };
+        SubmitResult: {
+            /** Format: uuid */
+            attemptId: string;
+            /** Format: int32 */
+            attemptsLeft: number | null;
+            certificateSerial: string | null;
+            courseCompleted: boolean;
+            expired: boolean;
+            /** Format: int32 */
+            passScore: number;
+            passed: boolean;
+            questions: components["schemas"]["QuestionOutcome"][];
+            /** Format: int32 */
+            score: number;
         };
         TenantResponse: {
             /** Format: uuid */
@@ -619,6 +1230,20 @@ export interface components {
             status?: "INVITED" | "ACTIVE" | "DISABLED";
             unassignDepartment?: boolean;
         };
+        Verification: {
+            companyName: string;
+            courseTitle: string;
+            holderName: string;
+            /** Format: date-time */
+            issuedAt: string;
+            serial: string;
+        };
+        VideoContent: {
+            /** Format: int32 */
+            durationSeconds: number | null;
+            format: string;
+            url: string;
+        };
         VideoResponse: {
             /** Format: int32 */
             durationSeconds: number | null;
@@ -646,6 +1271,74 @@ export interface components {
 }
 export type $defs = Record<string, never>;
 export interface operations {
+    list_2: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["AssignmentView"][];
+                };
+            };
+        };
+    };
+    assign: {
+        parameters: {
+            query?: never;
+            header?: {
+                "Idempotency-Key"?: string;
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["AssignRequest"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["AssignResult"];
+                };
+            };
+        };
+    };
+    recent: {
+        parameters: {
+            query?: {
+                limit?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["AuditEntry"][];
+                };
+            };
+        };
+    };
     list_1: {
         parameters: {
             query?: never;
@@ -892,6 +1585,58 @@ export interface operations {
             };
         };
     };
+    saveQuiz: {
+        parameters: {
+            query?: never;
+            header?: {
+                "If-Match"?: string;
+            };
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["QuizRequest"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["CourseDetail"];
+                };
+            };
+        };
+    };
+    deleteQuiz: {
+        parameters: {
+            query?: never;
+            header?: {
+                "If-Match"?: string;
+            };
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["CourseDetail"];
+                };
+            };
+        };
+    };
     addSection: {
         parameters: {
             query?: never;
@@ -1023,6 +1768,26 @@ export interface operations {
                 };
                 content: {
                     "*/*": components["schemas"]["CourseDetail"];
+                };
+            };
+        };
+    };
+    load: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["Dashboard"];
                 };
             };
         };
@@ -1205,7 +1970,7 @@ export interface operations {
             };
         };
     };
-    list_2: {
+    list_3: {
         parameters: {
             query?: never;
             header?: never;
@@ -1267,6 +2032,238 @@ export interface operations {
                 };
                 content: {
                     "*/*": components["schemas"]["MemberView"];
+                };
+            };
+        };
+    };
+    myEnrollments: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["MyEnrollment"][];
+                };
+            };
+        };
+    };
+    detail: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["EnrollmentDetail"];
+                };
+            };
+        };
+    };
+    mine: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["CertificateLink"];
+                };
+            };
+        };
+    };
+    complete_1: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+                lessonId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["ProgressResult"];
+                };
+            };
+        };
+    };
+    launch: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+                lessonId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["LessonContent"];
+                };
+            };
+        };
+    };
+    heartbeat: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+                lessonId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["HeartbeatRequest"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["ProgressResult"];
+                };
+            };
+        };
+    };
+    startQuiz: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["AttemptView"];
+                };
+            };
+        };
+    };
+    submit: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+                attemptId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["SubmitRequest"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["SubmitResult"];
+                };
+            };
+        };
+    };
+    verify: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                serial: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["Verification"];
+                };
+            };
+        };
+    };
+    remind: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: {
+            content: {
+                "application/json": components["schemas"]["RemindRequest"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["ReminderResult"];
                 };
             };
         };
@@ -1409,6 +2406,29 @@ export interface operations {
                 };
                 content: {
                     "*/*": components["schemas"]["VideoResponse"];
+                };
+            };
+        };
+    };
+    statements: {
+        parameters: {
+            query: {
+                registration: string;
+                limit?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["StatementResult"];
                 };
             };
         };

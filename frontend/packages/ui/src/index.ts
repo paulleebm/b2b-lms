@@ -10,7 +10,7 @@ export { Progress, type ProgressProps } from "./components/progress";
 export { EmptyState, ErrorState, LoadingRegion, Skeleton } from "./components/states";
 export { StatStrip, type Stat } from "./components/stat-strip";
 export { DataTable, type Column, type DataTableProps, type SortState } from "./components/data-table";
-export type { Department as DepartmentOption, MemberRole, MemberRow, MemberStatus } from "./screens/fixtures";
+export type { Department as DepartmentOption, LearnerCourse, LearnerRow, MemberRole, MemberRow, MemberStatus } from "./screens/fixtures";
 export { BarChart, type BarDatum } from "./components/bar-chart";
 export {
   FileUpload,
@@ -37,8 +37,8 @@ export {
   type NavSection,
 } from "./components/app-shell";
 
-export { AdminDashboardScreen } from "./screens/admin-dashboard";
-export { LearnerHomeScreen } from "./screens/learner-home";
+export { AdminDashboard, AdminDashboardScreen, type AdminDashboardProps, type DashboardStats } from "./screens/admin-dashboard";
+export { LearnerHome, LearnerHomeScreen, type LearnerHomeProps } from "./screens/learner-home";
 export {
   AdminMembers,
   AdminMembersScreen,

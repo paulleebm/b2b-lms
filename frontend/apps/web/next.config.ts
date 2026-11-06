@@ -47,6 +47,16 @@ const nextConfig: NextConfig = {
   reactStrictMode: true,
   // @lms/ui ships TypeScript source; let Next compile it.
   transpilePackages: ["@lms/ui", "@lms/api-client"],
+  // One instance per process: the OIDC configuration is cached on globalThis, and openid-client
+  // checks `instanceof Configuration`. Bundled per route, each route got its own copy of the class
+  // and the cached object failed the check in every route but the one that created it.
+  serverExternalPackages: ["openid-client"],
+  experimental: {
+    // The dev MCP endpoint mirrors every log line into .next/dev/logs. On this Windows monorepo
+    // that write was seen as a change, so each request triggered a rebuild and a full reload:
+    // pages refreshed forever and Playwright navigations were aborted.
+    mcpServer: false,
+  },
   async headers() {
     return [{ source: "/:path*", headers: securityHeaders }];
   },

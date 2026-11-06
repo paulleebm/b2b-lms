@@ -55,6 +55,12 @@ export type LearnerCourse = {
   lessonsTotal: number;
   nextLesson?: string;
   completedAt?: string;
+  /** Where "이어서 학습하기" / the row goes (the real app sets it; stories leave it out). */
+  href?: string;
+  /** Printed on the certificate. */
+  certificateSerial?: string;
+  /** Download link for the certificate PDF (real app). */
+  certificateHref?: string;
 };
 
 export const learnerCourses: LearnerCourse[] = [

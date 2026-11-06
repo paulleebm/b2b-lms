@@ -46,3 +46,13 @@ export const Edge: Story = {
     completed: [],
   },
 };
+
+/** Everything assigned is done: no "next up", the completed list stays visible (regression: it used to show the empty state). */
+export const AllCompleted: Story = {
+  args: { courses: [] },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    await expect(canvas.getByText("지금 들어야 할 교육이 없습니다")).toBeVisible();
+    await expect(canvas.getByRole("heading", { name: "수료한 교육" })).toBeVisible();
+  },
+};

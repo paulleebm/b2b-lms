@@ -16,6 +16,196 @@
         "required" : [ "title", "type" ],
         "type" : "object"
       },
+      "AssignRequest" : {
+        "properties" : {
+          "courseId" : {
+            "format" : "uuid",
+            "type" : "string"
+          },
+          "departmentIds" : {
+            "items" : {
+              "format" : "uuid",
+              "type" : "string"
+            },
+            "maxItems" : 100,
+            "minItems" : 0,
+            "type" : "array"
+          },
+          "dueAt" : {
+            "format" : "date-time",
+            "type" : "string"
+          },
+          "membershipIds" : {
+            "items" : {
+              "format" : "uuid",
+              "type" : "string"
+            },
+            "maxItems" : 500,
+            "minItems" : 0,
+            "type" : "array"
+          }
+        },
+        "required" : [ "courseId" ],
+        "type" : "object"
+      },
+      "AssignResult" : {
+        "properties" : {
+          "assignmentIds" : {
+            "items" : {
+              "format" : "uuid",
+              "type" : "string"
+            },
+            "type" : "array"
+          },
+          "created" : {
+            "format" : "int32",
+            "type" : "integer"
+          },
+          "existing" : {
+            "format" : "int32",
+            "type" : "integer"
+          },
+          "notActive" : {
+            "format" : "int32",
+            "type" : "integer"
+          },
+          "targeted" : {
+            "format" : "int32",
+            "type" : "integer"
+          }
+        },
+        "required" : [ "assignmentIds", "created", "existing", "notActive", "targeted" ],
+        "type" : "object"
+      },
+      "AssignmentView" : {
+        "properties" : {
+          "courseCompleted" : {
+            "format" : "int64",
+            "type" : "integer"
+          },
+          "courseEnrolled" : {
+            "format" : "int64",
+            "type" : "integer"
+          },
+          "courseId" : {
+            "format" : "uuid",
+            "type" : "string"
+          },
+          "courseTitle" : {
+            "type" : "string"
+          },
+          "createdAt" : {
+            "format" : "date-time",
+            "type" : "string"
+          },
+          "dueAt" : {
+            "format" : "date-time",
+            "type" : [ "string", "null" ]
+          },
+          "id" : {
+            "format" : "uuid",
+            "type" : "string"
+          },
+          "targetId" : {
+            "format" : "uuid",
+            "type" : "string"
+          },
+          "targetName" : {
+            "type" : [ "string", "null" ]
+          },
+          "targetType" : {
+            "enum" : [ "DEPARTMENT", "MEMBER" ],
+            "type" : "string"
+          }
+        },
+        "required" : [ "courseCompleted", "courseEnrolled", "courseId", "courseTitle", "createdAt", "dueAt", "id", "targetId", "targetName", "targetType" ],
+        "type" : "object"
+      },
+      "AttemptView" : {
+        "properties" : {
+          "attemptNumber" : {
+            "format" : "int32",
+            "type" : "integer"
+          },
+          "deadlineAt" : {
+            "format" : "date-time",
+            "type" : [ "string", "null" ]
+          },
+          "id" : {
+            "format" : "uuid",
+            "type" : "string"
+          },
+          "maxAttempts" : {
+            "format" : "int32",
+            "type" : [ "integer", "null" ]
+          },
+          "passScore" : {
+            "format" : "int32",
+            "type" : "integer"
+          },
+          "questions" : {
+            "items" : {
+              "$ref" : "#/components/schemas/QuestionForLearner"
+            },
+            "type" : "array"
+          },
+          "startedAt" : {
+            "format" : "date-time",
+            "type" : "string"
+          }
+        },
+        "required" : [ "attemptNumber", "deadlineAt", "id", "maxAttempts", "passScore", "questions", "startedAt" ],
+        "type" : "object"
+      },
+      "AuditEntry" : {
+        "properties" : {
+          "action" : {
+            "type" : "string"
+          },
+          "actorName" : {
+            "type" : [ "string", "null" ]
+          },
+          "at" : {
+            "format" : "date-time",
+            "type" : "string"
+          },
+          "id" : {
+            "format" : "uuid",
+            "type" : "string"
+          },
+          "metadata" : {
+            "$ref" : "#/components/schemas/JsonNode"
+          },
+          "targetId" : {
+            "format" : "uuid",
+            "type" : [ "string", "null" ]
+          },
+          "targetType" : {
+            "type" : "string"
+          },
+          "traceId" : {
+            "type" : [ "string", "null" ]
+          }
+        },
+        "required" : [ "action", "actorName", "at", "id", "metadata", "targetId", "targetType", "traceId" ],
+        "type" : "object"
+      },
+      "CertificateLink" : {
+        "properties" : {
+          "issuedAt" : {
+            "format" : "date-time",
+            "type" : "string"
+          },
+          "serial" : {
+            "type" : "string"
+          },
+          "url" : {
+            "type" : "string"
+          }
+        },
+        "required" : [ "issuedAt", "serial", "url" ],
+        "type" : "object"
+      },
       "CompleteResult" : {
         "properties" : {
           "fileId" : {
@@ -72,6 +262,13 @@
             "format" : "date-time",
             "type" : [ "string", "null" ]
           },
+          "quiz" : {
+            "oneOf" : [ {
+              "$ref" : "#/components/schemas/QuizView"
+            }, {
+              "type" : "null"
+            } ]
+          },
           "sections" : {
             "items" : {
               "$ref" : "#/components/schemas/SectionView"
@@ -94,7 +291,7 @@
             "type" : "integer"
           }
         },
-        "required" : [ "description", "id", "ownerId", "ownerName", "publishedAt", "sections", "status", "title", "updatedAt", "version" ],
+        "required" : [ "description", "id", "ownerId", "ownerName", "publishedAt", "quiz", "sections", "status", "title", "updatedAt", "version" ],
         "type" : "object"
       },
       "CourseSummary" : {
@@ -180,6 +377,37 @@
         "required" : [ "id", "name", "slug" ],
         "type" : "object"
       },
+      "Dashboard" : {
+        "properties" : {
+          "courses" : {
+            "items" : {
+              "$ref" : "#/components/schemas/GroupRow"
+            },
+            "type" : "array"
+          },
+          "departments" : {
+            "items" : {
+              "$ref" : "#/components/schemas/GroupRow"
+            },
+            "type" : "array"
+          },
+          "generatedAt" : {
+            "format" : "date-time",
+            "type" : "string"
+          },
+          "kpi" : {
+            "$ref" : "#/components/schemas/Kpi"
+          },
+          "pending" : {
+            "items" : {
+              "$ref" : "#/components/schemas/PendingRow"
+            },
+            "type" : "array"
+          }
+        },
+        "required" : [ "courses", "departments", "generatedAt", "kpi", "pending" ],
+        "type" : "object"
+      },
       "DepartmentResponse" : {
         "properties" : {
           "createdAt" : {
@@ -195,6 +423,25 @@
           }
         },
         "required" : [ "createdAt", "id", "name" ],
+        "type" : "object"
+      },
+      "DocumentContent" : {
+        "properties" : {
+          "contentType" : {
+            "type" : "string"
+          },
+          "fileName" : {
+            "type" : "string"
+          },
+          "sizeBytes" : {
+            "format" : "int64",
+            "type" : "integer"
+          },
+          "url" : {
+            "type" : "string"
+          }
+        },
+        "required" : [ "contentType", "fileName", "sizeBytes", "url" ],
         "type" : "object"
       },
       "DocumentSummary" : {
@@ -232,6 +479,112 @@
           }
         },
         "required" : [ "expiresAt", "url" ],
+        "type" : "object"
+      },
+      "EnrollmentDetail" : {
+        "properties" : {
+          "certificateSerial" : {
+            "type" : [ "string", "null" ]
+          },
+          "completedAt" : {
+            "format" : "date-time",
+            "type" : [ "string", "null" ]
+          },
+          "courseId" : {
+            "format" : "uuid",
+            "type" : "string"
+          },
+          "description" : {
+            "type" : "string"
+          },
+          "dueAt" : {
+            "format" : "date-time",
+            "type" : [ "string", "null" ]
+          },
+          "id" : {
+            "format" : "uuid",
+            "type" : "string"
+          },
+          "lessonsDone" : {
+            "format" : "int32",
+            "type" : "integer"
+          },
+          "lessonsTotal" : {
+            "format" : "int32",
+            "type" : "integer"
+          },
+          "nextLesson" : {
+            "oneOf" : [ {
+              "$ref" : "#/components/schemas/LessonRef"
+            }, {
+              "type" : "null"
+            } ]
+          },
+          "overdue" : {
+            "type" : "boolean"
+          },
+          "quiz" : {
+            "oneOf" : [ {
+              "$ref" : "#/components/schemas/QuizState"
+            }, {
+              "type" : "null"
+            } ]
+          },
+          "sections" : {
+            "items" : {
+              "$ref" : "#/components/schemas/SectionState"
+            },
+            "type" : "array"
+          },
+          "status" : {
+            "enum" : [ "NOT_STARTED", "IN_PROGRESS", "COMPLETED" ],
+            "type" : "string"
+          },
+          "title" : {
+            "type" : "string"
+          }
+        },
+        "required" : [ "certificateSerial", "completedAt", "courseId", "description", "dueAt", "id", "lessonsDone", "lessonsTotal", "nextLesson", "overdue", "quiz", "sections", "status", "title" ],
+        "type" : "object"
+      },
+      "GroupRow" : {
+        "properties" : {
+          "completed" : {
+            "format" : "int64",
+            "type" : "integer"
+          },
+          "completionRate" : {
+            "format" : "int32",
+            "type" : "integer"
+          },
+          "enrolled" : {
+            "format" : "int64",
+            "type" : "integer"
+          },
+          "id" : {
+            "format" : "uuid",
+            "type" : [ "string", "null" ]
+          },
+          "name" : {
+            "type" : "string"
+          },
+          "overdue" : {
+            "format" : "int64",
+            "type" : "integer"
+          }
+        },
+        "required" : [ "completed", "completionRate", "enrolled", "id", "name", "overdue" ],
+        "type" : "object"
+      },
+      "HeartbeatRequest" : {
+        "properties" : {
+          "positionSec" : {
+            "format" : "int32",
+            "maximum" : 86400,
+            "minimum" : 0,
+            "type" : "integer"
+          }
+        },
         "type" : "object"
       },
       "InitResult" : {
@@ -346,6 +699,218 @@
           }
         },
         "required" : [ "email", "message", "outcome" ],
+        "type" : "object"
+      },
+      "JsonNode" : {
+        "properties" : {
+          "array" : {
+            "type" : "boolean"
+          },
+          "bigDecimal" : {
+            "type" : "boolean"
+          },
+          "bigInteger" : {
+            "type" : "boolean"
+          },
+          "binary" : {
+            "type" : "boolean"
+          },
+          "boolean" : {
+            "type" : "boolean"
+          },
+          "container" : {
+            "type" : "boolean"
+          },
+          "double" : {
+            "type" : "boolean"
+          },
+          "embeddedValue" : {
+            "type" : "boolean"
+          },
+          "empty" : {
+            "type" : "boolean"
+          },
+          "float" : {
+            "type" : "boolean"
+          },
+          "floatingPointNumber" : {
+            "type" : "boolean"
+          },
+          "int" : {
+            "type" : "boolean"
+          },
+          "integralNumber" : {
+            "type" : "boolean"
+          },
+          "long" : {
+            "type" : "boolean"
+          },
+          "missingNode" : {
+            "type" : "boolean"
+          },
+          "nodeType" : {
+            "enum" : [ "ARRAY", "BINARY", "BOOLEAN", "MISSING", "NULL", "NUMBER", "OBJECT", "POJO", "STRING" ],
+            "type" : "string"
+          },
+          "null" : {
+            "type" : "boolean"
+          },
+          "number" : {
+            "type" : "boolean"
+          },
+          "object" : {
+            "type" : "boolean"
+          },
+          "pojo" : {
+            "type" : "boolean"
+          },
+          "short" : {
+            "type" : "boolean"
+          },
+          "string" : {
+            "type" : "boolean"
+          },
+          "textual" : {
+            "deprecated" : true,
+            "type" : "boolean"
+          },
+          "valueNode" : {
+            "type" : "boolean"
+          }
+        },
+        "required" : [ "array", "bigDecimal", "bigInteger", "binary", "boolean", "container", "double", "embeddedValue", "empty", "float", "floatingPointNumber", "int", "integralNumber", "long", "missingNode", "nodeType", "null", "number", "object", "pojo", "short", "string", "textual", "valueNode" ],
+        "type" : "object"
+      },
+      "Kpi" : {
+        "properties" : {
+          "activeMembers" : {
+            "format" : "int64",
+            "type" : "integer"
+          },
+          "completed" : {
+            "format" : "int64",
+            "type" : "integer"
+          },
+          "completionRate" : {
+            "format" : "int32",
+            "type" : "integer"
+          },
+          "dueSoon" : {
+            "format" : "int64",
+            "type" : "integer"
+          },
+          "enrolled" : {
+            "format" : "int64",
+            "type" : "integer"
+          },
+          "inProgress" : {
+            "format" : "int64",
+            "type" : "integer"
+          },
+          "notStarted" : {
+            "format" : "int64",
+            "type" : "integer"
+          },
+          "overdue" : {
+            "format" : "int64",
+            "type" : "integer"
+          }
+        },
+        "required" : [ "activeMembers", "completed", "completionRate", "dueSoon", "enrolled", "inProgress", "notStarted", "overdue" ],
+        "type" : "object"
+      },
+      "LessonContent" : {
+        "properties" : {
+          "body" : {
+            "type" : [ "string", "null" ]
+          },
+          "completed" : {
+            "type" : "boolean"
+          },
+          "document" : {
+            "oneOf" : [ {
+              "$ref" : "#/components/schemas/DocumentContent"
+            }, {
+              "type" : "null"
+            } ]
+          },
+          "id" : {
+            "format" : "uuid",
+            "type" : "string"
+          },
+          "lastPositionSec" : {
+            "format" : "int32",
+            "type" : "integer"
+          },
+          "next" : {
+            "oneOf" : [ {
+              "$ref" : "#/components/schemas/LessonRef"
+            }, {
+              "type" : "null"
+            } ]
+          },
+          "previous" : {
+            "oneOf" : [ {
+              "$ref" : "#/components/schemas/LessonRef"
+            }, {
+              "type" : "null"
+            } ]
+          },
+          "title" : {
+            "type" : "string"
+          },
+          "type" : {
+            "type" : "string"
+          },
+          "video" : {
+            "oneOf" : [ {
+              "$ref" : "#/components/schemas/VideoContent"
+            }, {
+              "type" : "null"
+            } ]
+          },
+          "watchedSec" : {
+            "format" : "int32",
+            "type" : "integer"
+          }
+        },
+        "required" : [ "body", "completed", "document", "id", "lastPositionSec", "next", "previous", "title", "type", "video", "watchedSec" ],
+        "type" : "object"
+      },
+      "LessonRef" : {
+        "properties" : {
+          "id" : {
+            "format" : "uuid",
+            "type" : "string"
+          },
+          "title" : {
+            "type" : "string"
+          }
+        },
+        "required" : [ "id", "title" ],
+        "type" : "object"
+      },
+      "LessonState" : {
+        "properties" : {
+          "completed" : {
+            "type" : "boolean"
+          },
+          "id" : {
+            "format" : "uuid",
+            "type" : "string"
+          },
+          "percent" : {
+            "format" : "int32",
+            "type" : [ "integer", "null" ]
+          },
+          "title" : {
+            "type" : "string"
+          },
+          "type" : {
+            "type" : "string"
+          }
+        },
+        "required" : [ "completed", "id", "percent", "title", "type" ],
         "type" : "object"
       },
       "LessonView" : {
@@ -480,6 +1045,71 @@
         "required" : [ "name", "role", "slug", "status", "tenantId" ],
         "type" : "object"
       },
+      "MyEnrollment" : {
+        "properties" : {
+          "certificateSerial" : {
+            "type" : [ "string", "null" ]
+          },
+          "completedAt" : {
+            "format" : "date-time",
+            "type" : [ "string", "null" ]
+          },
+          "courseId" : {
+            "format" : "uuid",
+            "type" : "string"
+          },
+          "description" : {
+            "type" : "string"
+          },
+          "dueAt" : {
+            "format" : "date-time",
+            "type" : [ "string", "null" ]
+          },
+          "id" : {
+            "format" : "uuid",
+            "type" : "string"
+          },
+          "lessonsDone" : {
+            "format" : "int32",
+            "type" : "integer"
+          },
+          "lessonsTotal" : {
+            "format" : "int32",
+            "type" : "integer"
+          },
+          "nextLesson" : {
+            "oneOf" : [ {
+              "$ref" : "#/components/schemas/LessonRef"
+            }, {
+              "type" : "null"
+            } ]
+          },
+          "overdue" : {
+            "type" : "boolean"
+          },
+          "status" : {
+            "enum" : [ "NOT_STARTED", "IN_PROGRESS", "COMPLETED" ],
+            "type" : "string"
+          },
+          "title" : {
+            "type" : "string"
+          }
+        },
+        "required" : [ "certificateSerial", "completedAt", "courseId", "description", "dueAt", "id", "lessonsDone", "lessonsTotal", "nextLesson", "overdue", "status", "title" ],
+        "type" : "object"
+      },
+      "Option" : {
+        "properties" : {
+          "id" : {
+            "type" : "string"
+          },
+          "text" : {
+            "type" : "string"
+          }
+        },
+        "required" : [ "id", "text" ],
+        "type" : "object"
+      },
       "OutlineEntry" : {
         "properties" : {
           "id" : {
@@ -572,6 +1202,293 @@
         "required" : [ "parts" ],
         "type" : "object"
       },
+      "PendingRow" : {
+        "properties" : {
+          "courseId" : {
+            "format" : "uuid",
+            "type" : "string"
+          },
+          "courseTitle" : {
+            "type" : "string"
+          },
+          "departmentName" : {
+            "type" : [ "string", "null" ]
+          },
+          "dueAt" : {
+            "format" : "date-time",
+            "type" : [ "string", "null" ]
+          },
+          "email" : {
+            "type" : "string"
+          },
+          "enrollmentId" : {
+            "format" : "uuid",
+            "type" : "string"
+          },
+          "lessonsDone" : {
+            "format" : "int64",
+            "type" : "integer"
+          },
+          "lessonsTotal" : {
+            "format" : "int64",
+            "type" : "integer"
+          },
+          "memberName" : {
+            "type" : "string"
+          },
+          "overdue" : {
+            "type" : "boolean"
+          },
+          "remindedAt" : {
+            "format" : "date-time",
+            "type" : [ "string", "null" ]
+          },
+          "status" : {
+            "type" : "string"
+          }
+        },
+        "required" : [ "courseId", "courseTitle", "departmentName", "dueAt", "email", "enrollmentId", "lessonsDone", "lessonsTotal", "memberName", "overdue", "remindedAt", "status" ],
+        "type" : "object"
+      },
+      "ProgressResult" : {
+        "properties" : {
+          "certificateSerial" : {
+            "type" : [ "string", "null" ]
+          },
+          "completed" : {
+            "type" : "boolean"
+          },
+          "courseCompleted" : {
+            "type" : "boolean"
+          },
+          "durationSeconds" : {
+            "format" : "int32",
+            "type" : [ "integer", "null" ]
+          },
+          "percent" : {
+            "format" : "int32",
+            "type" : [ "integer", "null" ]
+          },
+          "watchedSec" : {
+            "format" : "int32",
+            "type" : "integer"
+          }
+        },
+        "required" : [ "certificateSerial", "completed", "courseCompleted", "durationSeconds", "percent", "watchedSec" ],
+        "type" : "object"
+      },
+      "QuestionForLearner" : {
+        "properties" : {
+          "id" : {
+            "format" : "uuid",
+            "type" : "string"
+          },
+          "options" : {
+            "items" : {
+              "$ref" : "#/components/schemas/Option"
+            },
+            "type" : "array"
+          },
+          "points" : {
+            "format" : "int32",
+            "type" : "integer"
+          },
+          "prompt" : {
+            "type" : "string"
+          },
+          "type" : {
+            "type" : "string"
+          }
+        },
+        "required" : [ "id", "options", "points", "prompt", "type" ],
+        "type" : "object"
+      },
+      "QuestionOutcome" : {
+        "properties" : {
+          "correct" : {
+            "type" : "boolean"
+          },
+          "questionId" : {
+            "format" : "uuid",
+            "type" : "string"
+          }
+        },
+        "required" : [ "correct", "questionId" ],
+        "type" : "object"
+      },
+      "QuestionRequest" : {
+        "properties" : {
+          "correct" : {
+            "items" : {
+              "format" : "int32",
+              "type" : "integer"
+            },
+            "maxItems" : 8,
+            "minItems" : 0,
+            "type" : "array"
+          },
+          "options" : {
+            "items" : {
+              "maxLength" : 500,
+              "minLength" : 0,
+              "type" : "string"
+            },
+            "maxItems" : 8,
+            "minItems" : 0,
+            "type" : "array"
+          },
+          "points" : {
+            "format" : "int32",
+            "maximum" : 100,
+            "minimum" : 1,
+            "type" : "integer"
+          },
+          "prompt" : {
+            "maxLength" : 2000,
+            "minLength" : 0,
+            "type" : "string"
+          },
+          "type" : {
+            "enum" : [ "SINGLE", "MULTIPLE" ],
+            "type" : "string"
+          }
+        },
+        "required" : [ "correct", "options", "prompt", "type" ],
+        "type" : "object"
+      },
+      "QuestionView" : {
+        "properties" : {
+          "answer" : {
+            "items" : {
+              "type" : "string"
+            },
+            "type" : "array"
+          },
+          "id" : {
+            "format" : "uuid",
+            "type" : "string"
+          },
+          "options" : {
+            "items" : {
+              "$ref" : "#/components/schemas/Option"
+            },
+            "type" : "array"
+          },
+          "points" : {
+            "format" : "int32",
+            "type" : "integer"
+          },
+          "prompt" : {
+            "type" : "string"
+          },
+          "type" : {
+            "enum" : [ "SINGLE", "MULTIPLE" ],
+            "type" : "string"
+          }
+        },
+        "required" : [ "answer", "id", "options", "points", "prompt", "type" ],
+        "type" : "object"
+      },
+      "QuizRequest" : {
+        "properties" : {
+          "maxAttempts" : {
+            "format" : "int32",
+            "maximum" : 20,
+            "minimum" : 1,
+            "type" : "integer"
+          },
+          "passScore" : {
+            "format" : "int32",
+            "maximum" : 100,
+            "minimum" : 1,
+            "type" : "integer"
+          },
+          "questions" : {
+            "items" : {
+              "$ref" : "#/components/schemas/QuestionRequest"
+            },
+            "maxItems" : 50,
+            "minItems" : 0,
+            "type" : "array"
+          },
+          "timeLimitSec" : {
+            "format" : "int32",
+            "maximum" : 14400,
+            "minimum" : 60,
+            "type" : "integer"
+          }
+        },
+        "required" : [ "questions" ],
+        "type" : "object"
+      },
+      "QuizState" : {
+        "properties" : {
+          "attemptsUsed" : {
+            "format" : "int32",
+            "type" : "integer"
+          },
+          "bestScore" : {
+            "format" : "int32",
+            "type" : [ "integer", "null" ]
+          },
+          "maxAttempts" : {
+            "format" : "int32",
+            "type" : [ "integer", "null" ]
+          },
+          "openAttemptId" : {
+            "format" : "uuid",
+            "type" : [ "string", "null" ]
+          },
+          "passScore" : {
+            "format" : "int32",
+            "type" : "integer"
+          },
+          "passed" : {
+            "type" : "boolean"
+          },
+          "questionCount" : {
+            "format" : "int32",
+            "type" : "integer"
+          },
+          "timeLimitSec" : {
+            "format" : "int32",
+            "type" : [ "integer", "null" ]
+          },
+          "unlocked" : {
+            "type" : "boolean"
+          }
+        },
+        "required" : [ "attemptsUsed", "bestScore", "maxAttempts", "openAttemptId", "passScore", "passed", "questionCount", "timeLimitSec", "unlocked" ],
+        "type" : "object"
+      },
+      "QuizView" : {
+        "properties" : {
+          "maxAttempts" : {
+            "format" : "int32",
+            "type" : [ "integer", "null" ]
+          },
+          "passScore" : {
+            "format" : "int32",
+            "type" : "integer"
+          },
+          "questions" : {
+            "items" : {
+              "$ref" : "#/components/schemas/QuestionView"
+            },
+            "type" : "array"
+          },
+          "revision" : {
+            "format" : "int32",
+            "type" : "integer"
+          },
+          "timeLimitSec" : {
+            "format" : "int32",
+            "type" : [ "integer", "null" ]
+          }
+        },
+        "required" : [ "maxAttempts", "passScore", "questions", "revision", "timeLimitSec" ],
+        "type" : "object"
+      },
       "RegisterTenantRequest" : {
         "properties" : {
           "domain" : {
@@ -594,6 +1511,53 @@
         "required" : [ "domain", "name", "slug" ],
         "type" : "object"
       },
+      "RemindRequest" : {
+        "properties" : {
+          "courseId" : {
+            "format" : "uuid",
+            "type" : [ "string", "null" ]
+          },
+          "enrollmentIds" : {
+            "items" : {
+              "format" : "uuid",
+              "type" : [ "string", "null" ]
+            },
+            "maxItems" : 500,
+            "minItems" : 0,
+            "type" : [ "array", "null" ]
+          }
+        },
+        "type" : "object"
+      },
+      "ReminderResult" : {
+        "properties" : {
+          "queued" : {
+            "format" : "int32",
+            "type" : "integer"
+          }
+        },
+        "required" : [ "queued" ],
+        "type" : "object"
+      },
+      "SectionState" : {
+        "properties" : {
+          "id" : {
+            "format" : "uuid",
+            "type" : "string"
+          },
+          "lessons" : {
+            "items" : {
+              "$ref" : "#/components/schemas/LessonState"
+            },
+            "type" : "array"
+          },
+          "title" : {
+            "type" : "string"
+          }
+        },
+        "required" : [ "id", "lessons", "title" ],
+        "type" : "object"
+      },
       "SectionView" : {
         "properties" : {
           "id" : {
@@ -611,6 +1575,73 @@
           }
         },
         "required" : [ "id", "lessons", "title" ],
+        "type" : "object"
+      },
+      "StatementResult" : {
+        "properties" : {
+          "statements" : {
+            "items" : {
+              "$ref" : "#/components/schemas/JsonNode"
+            },
+            "type" : "array"
+          }
+        },
+        "required" : [ "statements" ],
+        "type" : "object"
+      },
+      "SubmitRequest" : {
+        "properties" : {
+          "answers" : {
+            "additionalProperties" : {
+              "items" : {
+                "type" : "string"
+              },
+              "type" : "array"
+            },
+            "type" : "object"
+          }
+        },
+        "required" : [ "answers" ],
+        "type" : "object"
+      },
+      "SubmitResult" : {
+        "properties" : {
+          "attemptId" : {
+            "format" : "uuid",
+            "type" : "string"
+          },
+          "attemptsLeft" : {
+            "format" : "int32",
+            "type" : [ "integer", "null" ]
+          },
+          "certificateSerial" : {
+            "type" : [ "string", "null" ]
+          },
+          "courseCompleted" : {
+            "type" : "boolean"
+          },
+          "expired" : {
+            "type" : "boolean"
+          },
+          "passScore" : {
+            "format" : "int32",
+            "type" : "integer"
+          },
+          "passed" : {
+            "type" : "boolean"
+          },
+          "questions" : {
+            "items" : {
+              "$ref" : "#/components/schemas/QuestionOutcome"
+            },
+            "type" : "array"
+          },
+          "score" : {
+            "format" : "int32",
+            "type" : "integer"
+          }
+        },
+        "required" : [ "attemptId", "attemptsLeft", "certificateSerial", "courseCompleted", "expired", "passScore", "passed", "questions", "score" ],
         "type" : "object"
       },
       "TenantResponse" : {
@@ -698,6 +1729,44 @@
         },
         "type" : "object"
       },
+      "Verification" : {
+        "properties" : {
+          "companyName" : {
+            "type" : "string"
+          },
+          "courseTitle" : {
+            "type" : "string"
+          },
+          "holderName" : {
+            "type" : "string"
+          },
+          "issuedAt" : {
+            "format" : "date-time",
+            "type" : "string"
+          },
+          "serial" : {
+            "type" : "string"
+          }
+        },
+        "required" : [ "companyName", "courseTitle", "holderName", "issuedAt", "serial" ],
+        "type" : "object"
+      },
+      "VideoContent" : {
+        "properties" : {
+          "durationSeconds" : {
+            "format" : "int32",
+            "type" : [ "integer", "null" ]
+          },
+          "format" : {
+            "type" : "string"
+          },
+          "url" : {
+            "type" : "string"
+          }
+        },
+        "required" : [ "durationSeconds", "format", "url" ],
+        "type" : "object"
+      },
       "VideoResponse" : {
         "properties" : {
           "durationSeconds" : {
@@ -756,6 +1825,92 @@
   },
   "openapi" : "3.1.0",
   "paths" : {
+    "/v1/assignments" : {
+      "get" : {
+        "operationId" : "list_2",
+        "responses" : {
+          "200" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "items" : {
+                    "$ref" : "#/components/schemas/AssignmentView"
+                  },
+                  "type" : "array"
+                }
+              }
+            },
+            "description" : "OK"
+          }
+        },
+        "tags" : [ "assignment-controller" ]
+      },
+      "post" : {
+        "operationId" : "assign",
+        "parameters" : [ {
+          "in" : "header",
+          "name" : "Idempotency-Key",
+          "required" : false,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/AssignRequest"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "200" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/AssignResult"
+                }
+              }
+            },
+            "description" : "OK"
+          }
+        },
+        "tags" : [ "assignment-controller" ]
+      }
+    },
+    "/v1/audit-log" : {
+      "get" : {
+        "operationId" : "recent",
+        "parameters" : [ {
+          "in" : "query",
+          "name" : "limit",
+          "required" : false,
+          "schema" : {
+            "default" : 100,
+            "format" : "int32",
+            "type" : "integer"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "items" : {
+                    "$ref" : "#/components/schemas/AuditEntry"
+                  },
+                  "type" : "array"
+                }
+              }
+            },
+            "description" : "OK"
+          }
+        },
+        "tags" : [ "audit-controller" ]
+      }
+    },
     "/v1/courses" : {
       "get" : {
         "operationId" : "list_1",
@@ -1101,6 +2256,82 @@
         "tags" : [ "course-controller" ]
       }
     },
+    "/v1/courses/{id}/quiz" : {
+      "delete" : {
+        "operationId" : "deleteQuiz",
+        "parameters" : [ {
+          "in" : "path",
+          "name" : "id",
+          "required" : true,
+          "schema" : {
+            "format" : "uuid",
+            "type" : "string"
+          }
+        }, {
+          "in" : "header",
+          "name" : "If-Match",
+          "required" : false,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/CourseDetail"
+                }
+              }
+            },
+            "description" : "OK"
+          }
+        },
+        "tags" : [ "course-controller" ]
+      },
+      "put" : {
+        "operationId" : "saveQuiz",
+        "parameters" : [ {
+          "in" : "path",
+          "name" : "id",
+          "required" : true,
+          "schema" : {
+            "format" : "uuid",
+            "type" : "string"
+          }
+        }, {
+          "in" : "header",
+          "name" : "If-Match",
+          "required" : false,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/QuizRequest"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "200" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/CourseDetail"
+                }
+              }
+            },
+            "description" : "OK"
+          }
+        },
+        "tags" : [ "course-controller" ]
+      }
+    },
     "/v1/courses/{id}/sections" : {
       "post" : {
         "operationId" : "addSection",
@@ -1323,6 +2554,24 @@
         "tags" : [ "course-controller" ]
       }
     },
+    "/v1/dashboard" : {
+      "get" : {
+        "operationId" : "load",
+        "responses" : {
+          "200" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Dashboard"
+                }
+              }
+            },
+            "description" : "OK"
+          }
+        },
+        "tags" : [ "dashboard-controller" ]
+      }
+    },
     "/v1/departments" : {
       "get" : {
         "operationId" : "list",
@@ -1525,7 +2774,7 @@
     },
     "/v1/members" : {
       "get" : {
-        "operationId" : "list_2",
+        "operationId" : "list_3",
         "responses" : {
           "200" : {
             "content" : {
@@ -1597,6 +2846,321 @@
           }
         },
         "tags" : [ "member-controller" ]
+      }
+    },
+    "/v1/my/enrollments" : {
+      "get" : {
+        "operationId" : "myEnrollments",
+        "responses" : {
+          "200" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "items" : {
+                    "$ref" : "#/components/schemas/MyEnrollment"
+                  },
+                  "type" : "array"
+                }
+              }
+            },
+            "description" : "OK"
+          }
+        },
+        "tags" : [ "learner-controller" ]
+      }
+    },
+    "/v1/my/enrollments/{id}" : {
+      "get" : {
+        "operationId" : "detail",
+        "parameters" : [ {
+          "in" : "path",
+          "name" : "id",
+          "required" : true,
+          "schema" : {
+            "format" : "uuid",
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/EnrollmentDetail"
+                }
+              }
+            },
+            "description" : "OK"
+          }
+        },
+        "tags" : [ "learner-controller" ]
+      }
+    },
+    "/v1/my/enrollments/{id}/certificate" : {
+      "get" : {
+        "operationId" : "mine",
+        "parameters" : [ {
+          "in" : "path",
+          "name" : "id",
+          "required" : true,
+          "schema" : {
+            "format" : "uuid",
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/CertificateLink"
+                }
+              }
+            },
+            "description" : "OK"
+          }
+        },
+        "tags" : [ "certificate-controller" ]
+      }
+    },
+    "/v1/my/enrollments/{id}/lessons/{lessonId}/complete" : {
+      "post" : {
+        "operationId" : "complete_1",
+        "parameters" : [ {
+          "in" : "path",
+          "name" : "id",
+          "required" : true,
+          "schema" : {
+            "format" : "uuid",
+            "type" : "string"
+          }
+        }, {
+          "in" : "path",
+          "name" : "lessonId",
+          "required" : true,
+          "schema" : {
+            "format" : "uuid",
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ProgressResult"
+                }
+              }
+            },
+            "description" : "OK"
+          }
+        },
+        "tags" : [ "learner-controller" ]
+      }
+    },
+    "/v1/my/enrollments/{id}/lessons/{lessonId}/launch" : {
+      "post" : {
+        "operationId" : "launch",
+        "parameters" : [ {
+          "in" : "path",
+          "name" : "id",
+          "required" : true,
+          "schema" : {
+            "format" : "uuid",
+            "type" : "string"
+          }
+        }, {
+          "in" : "path",
+          "name" : "lessonId",
+          "required" : true,
+          "schema" : {
+            "format" : "uuid",
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/LessonContent"
+                }
+              }
+            },
+            "description" : "OK"
+          }
+        },
+        "tags" : [ "learner-controller" ]
+      }
+    },
+    "/v1/my/enrollments/{id}/lessons/{lessonId}/progress" : {
+      "put" : {
+        "operationId" : "heartbeat",
+        "parameters" : [ {
+          "in" : "path",
+          "name" : "id",
+          "required" : true,
+          "schema" : {
+            "format" : "uuid",
+            "type" : "string"
+          }
+        }, {
+          "in" : "path",
+          "name" : "lessonId",
+          "required" : true,
+          "schema" : {
+            "format" : "uuid",
+            "type" : "string"
+          }
+        } ],
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/HeartbeatRequest"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "200" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ProgressResult"
+                }
+              }
+            },
+            "description" : "OK"
+          }
+        },
+        "tags" : [ "learner-controller" ]
+      }
+    },
+    "/v1/my/enrollments/{id}/quiz/attempts" : {
+      "post" : {
+        "operationId" : "startQuiz",
+        "parameters" : [ {
+          "in" : "path",
+          "name" : "id",
+          "required" : true,
+          "schema" : {
+            "format" : "uuid",
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/AttemptView"
+                }
+              }
+            },
+            "description" : "OK"
+          }
+        },
+        "tags" : [ "learner-controller" ]
+      }
+    },
+    "/v1/my/enrollments/{id}/quiz/attempts/{attemptId}/submit" : {
+      "post" : {
+        "operationId" : "submit",
+        "parameters" : [ {
+          "in" : "path",
+          "name" : "id",
+          "required" : true,
+          "schema" : {
+            "format" : "uuid",
+            "type" : "string"
+          }
+        }, {
+          "in" : "path",
+          "name" : "attemptId",
+          "required" : true,
+          "schema" : {
+            "format" : "uuid",
+            "type" : "string"
+          }
+        } ],
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/SubmitRequest"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "200" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/SubmitResult"
+                }
+              }
+            },
+            "description" : "OK"
+          }
+        },
+        "tags" : [ "learner-controller" ]
+      }
+    },
+    "/v1/public/certificates/{serial}" : {
+      "get" : {
+        "operationId" : "verify",
+        "parameters" : [ {
+          "in" : "path",
+          "name" : "serial",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Verification"
+                }
+              }
+            },
+            "description" : "OK"
+          }
+        },
+        "tags" : [ "certificate-controller" ]
+      }
+    },
+    "/v1/reminders" : {
+      "post" : {
+        "operationId" : "remind",
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/RemindRequest"
+              }
+            }
+          }
+        },
+        "responses" : {
+          "200" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ReminderResult"
+                }
+              }
+            },
+            "description" : "OK"
+          }
+        },
+        "tags" : [ "reminder-controller" ]
       }
     },
     "/v1/tenants" : {
@@ -1773,6 +3337,42 @@
           }
         },
         "tags" : [ "file-controller" ]
+      }
+    },
+    "/v1/xapi/statements" : {
+      "get" : {
+        "operationId" : "statements",
+        "parameters" : [ {
+          "in" : "query",
+          "name" : "registration",
+          "required" : true,
+          "schema" : {
+            "format" : "uuid",
+            "type" : "string"
+          }
+        }, {
+          "in" : "query",
+          "name" : "limit",
+          "required" : false,
+          "schema" : {
+            "default" : 200,
+            "format" : "int32",
+            "type" : "integer"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/StatementResult"
+                }
+              }
+            },
+            "description" : "OK"
+          }
+        },
+        "tags" : [ "statement-controller" ]
       }
     }
   },
