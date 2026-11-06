@@ -1,6 +1,8 @@
 package com.lms.catalog.internal;
 
 import com.lms.shared.web.ApiNullable;
+import com.lms.catalog.CourseCatalog.Option;
+import com.lms.catalog.CourseUsage;
 import com.lms.files.MediaLibrary;
 import com.lms.files.MediaLibrary.DocumentSummary;
 import com.lms.files.MediaLibrary.VideoState;
@@ -41,14 +43,24 @@ class CatalogService {
     private final LessonRepository lessons;
     private final MediaLibrary media;
     private final MemberDirectory members;
+    private final QuizRepository quizzes;
+    private final QuestionRepository questions;
+    private final CourseUsage usage;
+    private final org.springframework.context.ApplicationEventPublisher events;
 
     CatalogService(CourseRepository courses, CourseSectionRepository sections, LessonRepository lessons,
-                   MediaLibrary media, MemberDirectory members) {
+                   MediaLibrary media, MemberDirectory members, QuizRepository quizzes,
+                   QuestionRepository questions, CourseUsage usage,
+                   org.springframework.context.ApplicationEventPublisher events) {
+        this.events = events;
         this.courses = courses;
         this.sections = sections;
         this.lessons = lessons;
         this.media = media;
         this.members = members;
+        this.quizzes = quizzes;
+        this.questions = questions;
+        this.usage = usage;
     }
 
     // --- views --------------------------------------------------------------------------------
@@ -63,7 +75,16 @@ class CatalogService {
     record CourseDetail(UUID id, String title, String description, Course.Status status, UUID ownerId,
                         @ApiNullable String ownerName, long version,
                         @ApiNullable Instant publishedAt, Instant updatedAt,
-                        List<SectionView> sections) {
+                        List<SectionView> sections, @ApiNullable QuizView quiz) {
+    }
+
+    /** The full quiz including the answer key: the studio API is for instructors and admins only. */
+    record QuizView(int passScore, @ApiNullable Integer maxAttempts, @ApiNullable Integer timeLimitSec, int revision,
+                    List<QuestionView> questions) {
+    }
+
+    record QuestionView(UUID id, Question.Type type, String prompt, List<Option> options,
+                        List<String> answer, int points) {
     }
 
     record SectionView(UUID id, String title, List<LessonView> lessons) {
@@ -139,13 +160,21 @@ class CatalogService {
                     .withErrors(problems);
         }
         course.publish();
+        events.publishEvent(new com.lms.catalog.CourseStatusChanged(course.getTenantId(), course.getId(), course.getTitle(), "PUBLISHED"));
         return saved(course);
     }
 
     @Transactional
     CourseDetail unpublish(UUID courseId, long expectedVersion) {
         Course course = editable(courseId, expectedVersion);
+        if (usage.hasEnrollments(courseId)) {
+            // Changing the outline under people who are halfway through would corrupt their
+            // progress and the quiz they are graded against. Archive instead, then copy.
+            throw ApiException.conflict("COURSE_IN_USE",
+                    "이미 배정되어 듣는 사람이 있는 코스는 게시를 취소할 수 없습니다. 보관한 뒤 새 코스로 만드세요.");
+        }
         course.unpublish();
+        events.publishEvent(new com.lms.catalog.CourseStatusChanged(course.getTenantId(), course.getId(), course.getTitle(), "DRAFT"));
         return saved(course);
     }
 
@@ -153,6 +182,7 @@ class CatalogService {
     CourseDetail archive(UUID courseId, long expectedVersion) {
         Course course = editable(courseId, expectedVersion);
         course.archive();
+        events.publishEvent(new com.lms.catalog.CourseStatusChanged(course.getTenantId(), course.getId(), course.getTitle(), "ARCHIVED"));
         return saved(course);
     }
 
@@ -282,6 +312,85 @@ class CatalogService {
         return saved(course);
     }
 
+    // --- quiz ---------------------------------------------------------------------------------
+
+    record QuestionInput(Question.Type type, String prompt, List<String> options, List<Integer> correct, int points) {
+    }
+
+    record QuizInput(int passScore, Integer maxAttempts, Integer timeLimitSec, List<QuestionInput> questions) {
+    }
+
+    /**
+     * Replaces the quiz as a whole (settings + every question) and bumps its revision. Option ids
+     * are assigned here ("a", "b", ...) so the answer key never depends on client-made ids.
+     */
+    @Transactional
+    CourseDetail saveQuiz(UUID courseId, long expectedVersion, QuizInput input) {
+        Course course = outlineEditable(courseId, expectedVersion);
+        List<String> problems = new ArrayList<>();
+        for (int i = 0; i < input.questions().size(); i++) {
+            QuestionInput q = input.questions().get(i);
+            String where = (i + 1) + "번 문항: ";
+            if (q.options().size() < 2 || q.options().size() > 8) {
+                problems.add(where + "보기는 2~8개여야 합니다.");
+            }
+            if (q.options().stream().anyMatch(o -> o == null || o.isBlank())) {
+                problems.add(where + "빈 보기가 있습니다.");
+            }
+            long distinct = q.correct().stream().distinct().count();
+            if (q.correct().stream().anyMatch(c -> c < 0 || c >= q.options().size())) {
+                problems.add(where + "정답 번호가 보기 범위를 벗어났습니다.");
+            } else if (q.type() == Question.Type.SINGLE && distinct != 1) {
+                problems.add(where + "단일 선택 문항은 정답이 하나여야 합니다.");
+            } else if (q.type() == Question.Type.MULTIPLE && distinct < 1) {
+                problems.add(where + "정답을 하나 이상 고르세요.");
+            }
+        }
+        if (!problems.isEmpty()) {
+            throw ApiException.badRequest("INVALID_QUIZ", "퀴즈를 저장하지 못했습니다. 고칠 곳을 확인하세요.")
+                    .withErrors(problems.stream().map(m -> Map.of("message", m)).toList());
+        }
+
+        Quiz quiz = quizzes.findByCourseId(courseId).orElseGet(() -> new Quiz(courseId));
+        quiz.configure(input.passScore(), input.maxAttempts(), input.timeLimitSec());
+        quizzes.save(quiz);
+        questions.deleteAllByQuizIdInBulk(quiz.getId());
+        for (int i = 0; i < input.questions().size(); i++) {
+            QuestionInput q = input.questions().get(i);
+            List<Option> options = new ArrayList<>();
+            for (int o = 0; o < q.options().size(); o++) {
+                options.add(new Option(optionId(o), q.options().get(o).strip()));
+            }
+            List<String> answer = q.correct().stream().distinct().sorted().map(CatalogService::optionId).toList();
+            questions.save(new Question(quiz.getId(), q.type(), q.prompt().strip(), QuizJson.options(options),
+                    QuizJson.ids(answer), q.points(), i));
+        }
+        course.touch();
+        return saved(course);
+    }
+
+    @Transactional
+    CourseDetail deleteQuiz(UUID courseId, long expectedVersion) {
+        Course course = outlineEditable(courseId, expectedVersion);
+        quizzes.findByCourseId(courseId).ifPresent(quizzes::delete);   // questions cascade in the DB
+        course.touch();
+        return saved(course);
+    }
+
+    /** 0 -> "a", 1 -> "b", ... */
+    static String optionId(int index) {
+        return Character.toString('a' + index);
+    }
+
+    private QuizView quizView(UUID courseId) {
+        return quizzes.findByCourseId(courseId).map(q -> new QuizView(q.getPassScore(), q.getMaxAttempts(),
+                q.getTimeLimitSec(), q.getRevision(), questions.findAllByQuizIdOrderByPosition(q.getId()).stream()
+                        .map(x -> new QuestionView(x.getId(), x.getType(), x.getPrompt(), QuizJson.options(x.getOptions()),
+                                QuizJson.ids(x.getAnswer()), x.getPoints()))
+                        .toList()))
+                .orElse(null);
+    }
+
     // --- publish rules ------------------------------------------------------------------------
 
     private List<PublishProblem> publishProblems(Course course) {
@@ -344,7 +453,7 @@ class CatalogService {
         String ownerName = members.displayNames(List.of(course.getOwnerId())).get(course.getOwnerId());
         return new CourseDetail(course.getId(), course.getTitle(), course.getDescription(), course.getStatus(),
                 course.getOwnerId(), ownerName, course.getVersion(), course.getPublishedAt(), course.getUpdatedAt(),
-                outline);
+                outline, quizView(course.getId()));
     }
 
     private static ContentState state(Lesson l, VideoSummary video, DocumentSummary doc) {

@@ -43,3 +43,19 @@ interface LessonRepository extends JpaRepository<Lesson, UUID> {
 
     List<Lesson> findAllBySectionIdOrderByPosition(UUID sectionId);
 }
+
+interface QuizRepository extends JpaRepository<Quiz, UUID> {
+
+    java.util.Optional<Quiz> findByCourseId(UUID courseId);
+
+    List<Quiz> findAllByCourseIdIn(Collection<UUID> courseIds);
+}
+
+interface QuestionRepository extends JpaRepository<Question, UUID> {
+
+    List<Question> findAllByQuizIdOrderByPosition(UUID quizId);
+
+    @org.springframework.data.jpa.repository.Modifying(flushAutomatically = true, clearAutomatically = false)
+    @Query("delete from Question q where q.quizId = :quizId")
+    void deleteAllByQuizIdInBulk(@Param("quizId") UUID quizId);
+}

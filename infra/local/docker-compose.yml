@@ -1,7 +1,7 @@
 # Local development stack.
 #   docker compose -f infra/local/docker-compose.yml up -d
 #
-# Ports:  postgres 5432 · valkey 6379 · keycloak 8080 · mailpit 8025 (UI) / 1025 (SMTP) · s3mock 9090
+# Ports:  postgres 5432 · valkey 6379 · keycloak 8080 · mailpit 8025 (UI) / 1025 (SMTP) · s3mock 9090 · elasticmq 9324 (SQS) / 9325 (UI)
 # The Spring API (8081) and Next.js (3000) run on the host with hot reload.
 # Credentials here are dev-only. Production values live in AWS SSM Parameter Store.
 
@@ -52,6 +52,15 @@ services:
       - "9090:9090"
     volumes:
       - s3data:/s3mockroot
+
+  # SQS-compatible queues (outbox relay → worker). Same AWS SDK code as in AWS.
+  elasticmq:
+    image: softwaremill/elasticmq-native:1.7.1
+    ports:
+      - "9324:9324"
+      - "9325:9325"
+    volumes:
+      - ./elasticmq.conf:/opt/elasticmq.conf:ro
 
   keycloak:
     image: quay.io/keycloak/keycloak:26.4

@@ -89,6 +89,16 @@ class DepartmentService implements com.lms.organization.DepartmentDirectory {
         return departments.existsById(departmentId);
     }
 
+    @Override
+    @Transactional(readOnly = true)
+    public java.util.Map<UUID, String> names(java.util.Collection<UUID> departmentIds) {
+        if (departmentIds.isEmpty()) {
+            return java.util.Map.of();
+        }
+        return departments.findAllById(departmentIds).stream()
+                .collect(java.util.stream.Collectors.toMap(Department::getId, Department::getName));
+    }
+
     @Transactional
     DepartmentController.DepartmentResponse rename(UUID id, String name) {
         Department department = departments.findById(id)

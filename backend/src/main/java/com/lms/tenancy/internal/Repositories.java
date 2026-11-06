@@ -51,6 +51,26 @@ interface MembershipRepository extends JpaRepository<Membership, UUID> {
     @Query("update Membership m set m.status = 'ACTIVE', m.joinedAt = :now where m.id = :id and m.status = 'INVITED'")
     int activateIfInvited(@Param("id") UUID id, @Param("now") Instant now);
 
+    @Query("select m.id from Membership m where m.departmentId in :departmentIds and m.status = 'ACTIVE'")
+    List<UUID> findActiveIdsInDepartments(@Param("departmentIds") java.util.Collection<UUID> departmentIds);
+
+    @Query("select m.id from Membership m where m.id in :ids and m.status = 'ACTIVE'")
+    List<UUID> findActiveIdsAmong(@Param("ids") java.util.Collection<UUID> ids);
+
+    @Query("""
+            select m.id as id, u.email as email, u.name as name from Membership m join AppUser u on u.id = m.userId
+            where m.id in :ids and m.status = 'ACTIVE'
+            """)
+    List<ContactRow> findActiveContacts(@Param("ids") java.util.Collection<UUID> ids);
+
+    interface ContactRow {
+        UUID getId();
+
+        String getEmail();
+
+        String getName();
+    }
+
     /** Display names for other modules (course owner, ...). RLS keeps it to the current company. */
     @Query("select m.id as id, coalesce(u.name, u.email) as name from Membership m join AppUser u on u.id = m.userId where m.id in :ids")
     List<DisplayNameRow> findDisplayNames(@Param("ids") java.util.Collection<UUID> ids);

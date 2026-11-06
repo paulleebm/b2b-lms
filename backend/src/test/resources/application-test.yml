@@ -8,6 +8,8 @@ spring:
   data:
     redis:
       url: redis://localhost:65535
+  cache:
+    type: simple                     # no Redis in tests; the cache key logic is the same
 
 management:
   health:
@@ -21,3 +23,7 @@ lms:
     part-size-bytes: 5242880         # 5 MiB (S3's minimum part size)
   media:
     fake-transcode-delay: 100ms
+  scheduling:
+    enabled: false                   # tests call jobs directly
+  outbox:
+    resubmit-every: PT1H

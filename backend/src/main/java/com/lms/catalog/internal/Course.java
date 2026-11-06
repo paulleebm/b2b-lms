@@ -130,6 +130,10 @@ class Course extends AbstractEntity {
         }
     }
 
+    UUID getTenantId() {
+        return tenantId;
+    }
+
     String getTitle() {
         return title;
     }

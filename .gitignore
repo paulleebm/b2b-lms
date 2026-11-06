@@ -33,9 +33,13 @@ storybook-static/
 *.tfstate.*
 *.tfvars
 !*.tfvars.example
+infra/terraform/**/backend.hcl
 
 # node_modules that some agent skills ship for local tooling
 .claude/skills/**/node_modules/
 
 # Personal local test account (only exists in this machine's Keycloak volume)
 infra/local/dev-accounts.md
+
+# Playwright traces and screenshots
+.e2e-results/

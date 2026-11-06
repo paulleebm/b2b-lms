@@ -158,6 +158,30 @@ public class KeycloakAdminClient {
                 .toBodilessEntity();
     }
 
+    /**
+     * Dev seeding only: a ready-to-use account with a known password (no email round trip).
+     * Real people get the set-password email instead ({@link #sendSetupEmail}).
+     */
+    public String provisionUser(String email, String firstName, String lastName, String password) {
+        String id = ensureUser(email).id();
+        http.put()
+                .uri("/admin/realms/{realm}/users/{id}", props.realm(), id)
+                .headers(h -> h.setBearerAuth(accessToken()))
+                .contentType(MediaType.APPLICATION_JSON)
+                .body(Map.of("firstName", firstName, "lastName", lastName, "emailVerified", true,
+                        "requiredActions", List.of()))
+                .retrieve()
+                .toBodilessEntity();
+        http.put()
+                .uri("/admin/realms/{realm}/users/{id}/reset-password", props.realm(), id)
+                .headers(h -> h.setBearerAuth(accessToken()))
+                .contentType(MediaType.APPLICATION_JSON)
+                .body(Map.of("type", "password", "value", password, "temporary", false))
+                .retrieve()
+                .toBodilessEntity();
+        return id;
+    }
+
     private String accessToken() {
         CachedToken current = token;
         if (current != null && current.expiresAt().isAfter(Instant.now().plusSeconds(30))) {

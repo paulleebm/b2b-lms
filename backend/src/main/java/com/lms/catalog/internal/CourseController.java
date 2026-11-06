@@ -3,7 +3,10 @@ package com.lms.catalog.internal;
 import com.lms.catalog.internal.CatalogService.CourseDetail;
 import com.lms.shared.web.ApiException;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.Max;
+import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import java.net.URI;
@@ -134,6 +137,21 @@ class CourseController {
                 .map(s -> new CatalogService.OutlineSection(s.id(), s.lessonIds())).toList()));
     }
 
+    /** Replaces the whole quiz (settings and every question). Draft courses only. */
+    @PutMapping("/{id}/quiz")
+    ResponseEntity<CourseDetail> saveQuiz(@PathVariable UUID id, @RequestHeader(value = HttpHeaders.IF_MATCH, required = false) String ifMatch,
+                                          @Valid @RequestBody QuizRequest request) {
+        return withEtag(catalog.saveQuiz(id, version(ifMatch), new CatalogService.QuizInput(
+                request.passScore(), request.maxAttempts(), request.timeLimitSec(),
+                request.questions().stream().map(q -> new CatalogService.QuestionInput(
+                        q.type(), q.prompt(), q.options(), q.correct(), q.points())).toList())));
+    }
+
+    @DeleteMapping("/{id}/quiz")
+    ResponseEntity<CourseDetail> deleteQuiz(@PathVariable UUID id, @RequestHeader(value = HttpHeaders.IF_MATCH, required = false) String ifMatch) {
+        return withEtag(catalog.deleteQuiz(id, version(ifMatch)));
+    }
+
     // --- ETag / If-Match ------------------------------------------------------------------------
 
     private static ResponseEntity<CourseDetail> withEtag(CourseDetail detail) {
@@ -188,5 +206,26 @@ class CourseController {
     }
 
     record OutlineEntry(@NotNull UUID id, @NotNull @Size(max = 500) List<@NotNull UUID> lessonIds) {
+    }
+
+    /**
+     * @param passScore    percent of points needed to pass
+     * @param maxAttempts  null = unlimited
+     * @param timeLimitSec null = no limit
+     */
+    record QuizRequest(
+            @Min(1) @Max(100) int passScore,
+            @Min(1) @Max(20) Integer maxAttempts,
+            @Min(60) @Max(14_400) Integer timeLimitSec,
+            @NotEmpty @Size(max = 50) List<@Valid QuestionRequest> questions) {
+    }
+
+    /** @param correct indexes into {@code options} (0-based) */
+    record QuestionRequest(
+            @NotNull Question.Type type,
+            @NotBlank @Size(max = 2000) String prompt,
+            @NotNull @Size(max = 8) List<@Size(max = 500) String> options,
+            @NotNull @Size(max = 8) List<@NotNull Integer> correct,
+            @Min(1) @Max(100) int points) {
     }
 }

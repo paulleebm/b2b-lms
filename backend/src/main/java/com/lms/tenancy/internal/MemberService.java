@@ -4,6 +4,7 @@ import com.lms.shared.web.ApiNullable;
 import com.lms.organization.DepartmentDirectory;
 import com.lms.shared.TenantContext;
 import com.lms.shared.web.ApiException;
+import com.lms.tenancy.MemberDepartmentChanged;
 import com.lms.tenancy.Role;
 import java.util.ArrayList;
 import java.util.List;
@@ -32,10 +33,12 @@ class MemberService {
     private final KeycloakAdminClient keycloak;
     private final KeycloakProperties keycloakProps;
     private final TransactionTemplate tx;
+    private final org.springframework.context.ApplicationEventPublisher events;
 
     MemberService(MembershipRepository memberships, AppUserRepository users, TenantRepository tenants,
                   DepartmentDirectory departments, KeycloakAdminClient keycloak, KeycloakProperties keycloakProps,
-                  PlatformTransactionManager txManager) {
+                  PlatformTransactionManager txManager, org.springframework.context.ApplicationEventPublisher events) {
+        this.events = events;
         this.memberships = memberships;
         this.users = users;
         this.tenants = tenants;
@@ -72,19 +75,33 @@ class MemberService {
             }
         }
 
-        if (change.role() != null) {
+        if (change.role() != null && change.role() != m.getRole()) {
+            events.publishEvent(new com.lms.tenancy.MemberUpdated(m.getTenantId(), m.getId(), "ROLE", m.getRole(), change.role()));
             m.changeRole(change.role());
         }
+        UUID departmentBefore = m.getDepartmentId();
         if (change.clearDepartment()) {
             m.assignDepartment(null);
         } else if (change.departmentId() != null) {
             requireDepartment(change.departmentId());
             m.assignDepartment(change.departmentId());
         }
+        if (!java.util.Objects.equals(departmentBefore, m.getDepartmentId())) {
+            events.publishEvent(new com.lms.tenancy.MemberUpdated(m.getTenantId(), m.getId(), "DEPARTMENT",
+                    departmentBefore, m.getDepartmentId()));
+        }
+        if (m.getStatus() == Membership.Status.ACTIVE && !java.util.Objects.equals(departmentBefore, m.getDepartmentId())) {
+            // After commit, learning adds the new department's assignments (docs/05 §7).
+            events.publishEvent(new MemberDepartmentChanged(m.getTenantId(), m.getId(), m.getDepartmentId()));
+        }
+        Membership.Status statusBefore = m.getStatus();
         if (change.status() == Membership.Status.DISABLED) {
             m.disable();
         } else if (change.status() == Membership.Status.ACTIVE) {
             m.enable();
+        }
+        if (statusBefore != m.getStatus()) {
+            events.publishEvent(new com.lms.tenancy.MemberUpdated(m.getTenantId(), m.getId(), "STATUS", statusBefore, m.getStatus()));
         }
         memberships.flush();
         return view(m);
@@ -119,6 +136,11 @@ class MemberService {
         List<InviteResult> results = new ArrayList<>();
         for (String raw : emails.stream().map(e -> e.strip().toLowerCase(Locale.ROOT)).distinct().toList()) {
             results.add(inviteOne(raw, role, departmentId, invitedBy, tenant));
+        }
+        long invited = results.stream().filter(r -> r.outcome() == InviteOutcome.INVITED).count();
+        if (invited > 0) {
+            tx.executeWithoutResult(s -> events.publishEvent(
+                    new com.lms.tenancy.MembersInvited(tenant.getId(), (int) invited, role.name())));
         }
         return results;
     }

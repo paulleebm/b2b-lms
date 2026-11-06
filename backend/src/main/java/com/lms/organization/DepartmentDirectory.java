@@ -1,5 +1,7 @@
 package com.lms.organization;
 
+import java.util.Collection;
+import java.util.Map;
 import java.util.UUID;
 
 /**
@@ -10,4 +12,7 @@ import java.util.UUID;
 public interface DepartmentDirectory {
 
     boolean exists(UUID departmentId);
+
+    /** id -> name for the given departments of the current company (unknown ids are absent). */
+    Map<UUID, String> names(Collection<UUID> departmentIds);
 }

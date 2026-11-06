@@ -72,8 +72,21 @@ class ObjectStorage {
         }
     }
 
+    void put(String key, byte[] bytes, String contentType) {
+        s3.putObject(r -> r.bucket(props.bucket()).key(key).contentType(contentType),
+                software.amazon.awssdk.core.sync.RequestBody.fromBytes(bytes));
+    }
+
     void delete(String key) {
         s3.deleteObject(r -> r.bucket(props.bucket()).key(key));
+    }
+
+    /** Short-lived GET shown in the page (video element, PDF viewer), not downloaded. */
+    URL presignGetInline(String key, Duration ttl) {
+        return presigner.presignGetObject(r -> r
+                .signatureDuration(ttl)
+                .getObjectRequest(g -> g.bucket(props.bucket()).key(key)))
+                .url();
     }
 
     /** Short-lived GET; the file name is set by us in Content-Disposition, not taken from the key. */
