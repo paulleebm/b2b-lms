@@ -1,0 +1,174 @@
+# LMS backend on the mini PC: a Portainer stack (Stacks → Add stack → Web editor: paste this file,
+# then "Load variables from .env file" with the stack.env that `terraform output -raw stack_env`
+# printed; add the two R2 key lines by hand). Images only: Portainer never builds anything here.
+#
+#   Internet ─▶ Cloudflare edge (TLS, Access) ─▶ cloudflared (outbound tunnel) ─▶ keycloak · api · mailpit
+#   Vercel BFF ─▶ api.<domain> with the Access service token
+#
+# No port is published on the host: the only way in is the tunnel, which dials out to Cloudflare,
+# so the router needs no port forwarding and the home IP stays private.
+# ${NAME:?…} makes the deploy fail when a variable is missing, instead of silently falling back to
+# the dev defaults baked into the images.
+
+name: lms
+
+x-api-env: &api-env
+  SPRING_PROFILES_ACTIVE: home
+  JAVA_TOOL_OPTIONS: -XX:MaxRAMPercentage=75
+  DB_URL: jdbc:postgresql://postgres:5432/lms
+  DB_APP_PASSWORD: ${LMS_APP_PASSWORD:?set LMS_APP_PASSWORD}
+  DB_OWNER_PASSWORD: ${LMS_OWNER_PASSWORD:?set LMS_OWNER_PASSWORD}
+  REDIS_URL: redis://valkey:6379
+  KEYCLOAK_ISSUER: https://${AUTH_HOST:?set AUTH_HOST}/realms/lms
+  KEYCLOAK_JWKS_URI: http://keycloak:8080/realms/lms/protocol/openid-connect/certs
+  KEYCLOAK_BASE_URL: http://keycloak:8080
+  KEYCLOAK_ADMIN_CLIENT_SECRET: ${LMS_ADMIN_CLIENT_SECRET:?set LMS_ADMIN_CLIENT_SECRET}
+  APP_URL: https://${APP_HOST:?set APP_HOST}
+  AWS_REGION: auto                       # R2's region; ElasticMQ ignores it
+  S3_ENDPOINT: ${S3_ENDPOINT:?set S3_ENDPOINT}
+  S3_BUCKET: ${S3_BUCKET:?set S3_BUCKET}
+  S3_ACCESS_KEY_ID: ${S3_ACCESS_KEY_ID:?set S3_ACCESS_KEY_ID (R2 API token)}
+  S3_SECRET_ACCESS_KEY: ${S3_SECRET_ACCESS_KEY:?set S3_SECRET_ACCESS_KEY (R2 API token)}
+  SQS_ENDPOINT: http://elasticmq:9324
+  MAIL_HOST: mailpit
+  MAIL_PORT: "1025"
+  MAIL_FROM: LMS <no-reply@${DOMAIN:?set DOMAIN}>
+
+services:
+  postgres:
+    image: ${IMAGE_PREFIX:?set IMAGE_PREFIX}/lms-postgres:${IMAGE_TAG:-latest}
+    restart: unless-stopped
+    environment:
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?set POSTGRES_PASSWORD}
+      LMS_OWNER_PASSWORD: ${LMS_OWNER_PASSWORD}
+      LMS_APP_PASSWORD: ${LMS_APP_PASSWORD}
+      KEYCLOAK_DB_PASSWORD: ${KEYCLOAK_DB_PASSWORD:?set KEYCLOAK_DB_PASSWORD}
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d keycloak"]
+      interval: 5s
+      timeout: 3s
+      retries: 30
+
+  valkey:
+    image: valkey/valkey:8-alpine
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "valkey-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+
+  elasticmq:
+    image: ${IMAGE_PREFIX}/lms-elasticmq:${IMAGE_TAG:-latest}
+    restart: unless-stopped
+
+  # Outgoing mail stays here (no SMTP provider needed for a demo); the inbox is mail.<domain>,
+  # behind Cloudflare Access (only ADMIN_EMAIL can open it).
+  mailpit:
+    image: axllent/mailpit:v1.33.0
+    restart: unless-stopped
+    environment:
+      MP_DATABASE: /data/mailpit.db
+      MP_MAX_MESSAGES: "2000"
+    volumes:
+      - maildata:/data
+
+  keycloak:
+    image: ${IMAGE_PREFIX}/lms-keycloak:${IMAGE_TAG:-latest}
+    restart: unless-stopped
+    environment:
+      KC_DB_URL: jdbc:postgresql://postgres:5432/keycloak
+      KC_DB_USERNAME: keycloak
+      KC_DB_PASSWORD: ${KEYCLOAK_DB_PASSWORD}
+      # Browsers and the Vercel BFF see https://auth.<domain>; the API reaches the same Keycloak
+      # over the Docker network (backchannel), and tokens still carry the public issuer.
+      KC_HOSTNAME: https://${AUTH_HOST}
+      KC_HOSTNAME_BACKCHANNEL_DYNAMIC: "true"
+      KC_HTTP_ENABLED: "true"            # TLS ends at Cloudflare; the tunnel carries HTTP inside
+      KC_PROXY_HEADERS: xforwarded
+      KC_BOOTSTRAP_ADMIN_USERNAME: admin
+      KC_BOOTSTRAP_ADMIN_PASSWORD: ${KEYCLOAK_ADMIN_PASSWORD:?set KEYCLOAK_ADMIN_PASSWORD}
+      # Placeholders in the realm file (used on the first import only)
+      LMS_APP_URL: https://${APP_HOST}
+      LMS_WEB_CLIENT_SECRET: ${LMS_WEB_CLIENT_SECRET:?set LMS_WEB_CLIENT_SECRET}
+      LMS_ADMIN_CLIENT_SECRET: ${LMS_ADMIN_CLIENT_SECRET}
+      LMS_API_CLIENT_SECRET: ${LMS_API_CLIENT_SECRET:?set LMS_API_CLIENT_SECRET}
+      LMS_SMTP_HOST: mailpit
+      LMS_SMTP_PORT: "1025"
+      LMS_SMTP_FROM: no-reply@${DOMAIN}
+    healthcheck:
+      # The image has no curl/wget; bash's /dev/tcp asks the management port directly.
+      test: ["CMD-SHELL", "exec 3<>/dev/tcp/127.0.0.1/9000 && printf 'GET /health/ready HTTP/1.1\\r\\nHost: localhost\\r\\nConnection: close\\r\\n\\r\\n' >&3 && grep -q '\"UP\"' <&3"]
+      interval: 10s
+      timeout: 5s
+      retries: 30
+      start_period: 30s
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  # Serves HTTP requests; runs Flyway on start. Scheduled jobs are guarded by ShedLock.
+  api:
+    image: ${IMAGE_PREFIX}/lms-api:${IMAGE_TAG:-latest}
+    restart: unless-stopped
+    environment:
+      <<: *api-env
+      WORKER_ENABLED: "false"
+    mem_limit: 1g
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://127.0.0.1:8081/actuator/health/readiness | grep -q UP"]
+      interval: 10s
+      timeout: 5s
+      retries: 30
+      start_period: 40s
+    depends_on:
+      postgres:
+        condition: service_healthy
+      valkey:
+        condition: service_healthy
+      keycloak:
+        condition: service_healthy
+      elasticmq:
+        condition: service_started
+
+  # Same image: consumes the SQS queues (certificates, mail, transcoding). Starts after the API so
+  # only one of them applies migrations on a fresh database.
+  worker:
+    image: ${IMAGE_PREFIX}/lms-api:${IMAGE_TAG:-latest}
+    restart: unless-stopped
+    environment:
+      <<: *api-env
+      WORKER_ENABLED: "true"
+    mem_limit: 1g
+    depends_on:
+      api:
+        condition: service_healthy
+
+  # One-off: demo companies, people and courses. Idempotent (existing companies are skipped), so
+  # it runs on every redeploy and exits when done ("Exited (0)" in Portainer is the normal state).
+  seed:
+    image: ${IMAGE_PREFIX}/lms-api:${IMAGE_TAG:-latest}
+    restart: "no"
+    command: ["--lms.seed=true", "--server.port=0"]
+    environment:
+      <<: *api-env
+      WORKER_ENABLED: "false"
+    depends_on:
+      api:
+        condition: service_healthy
+
+  cloudflared:
+    image: cloudflare/cloudflared:2026.10.7
+    restart: unless-stopped
+    command: ["tunnel", "--no-autoupdate", "run"]
+    environment:
+      TUNNEL_TOKEN: ${TUNNEL_TOKEN:?set TUNNEL_TOKEN}
+    depends_on:
+      keycloak:
+        condition: service_healthy
+
+volumes:
+  pgdata:
+  maildata:

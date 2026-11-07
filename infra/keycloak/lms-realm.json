@@ -25,9 +25,9 @@
   "supportedLocales": ["ko", "en"],
   "defaultLocale": "ko",
   "smtpServer": {
-    "host": "mailpit",
-    "port": "1025",
-    "from": "no-reply@lms.local",
+    "host": "${LMS_SMTP_HOST:mailpit}",
+    "port": "${LMS_SMTP_PORT:1025}",
+    "from": "${LMS_SMTP_FROM:no-reply@lms.local}",
     "fromDisplayName": "LMS"
   },
   "clients": [
@@ -39,17 +39,17 @@
       "protocol": "openid-connect",
       "publicClient": false,
       "clientAuthenticatorType": "client-secret",
-      "secret": "lms-web-dev-secret",
+      "secret": "${LMS_WEB_CLIENT_SECRET:lms-web-dev-secret}",
       "standardFlowEnabled": true,
       "implicitFlowEnabled": false,
       "directAccessGrantsEnabled": false,
       "serviceAccountsEnabled": false,
       "frontchannelLogout": false,
-      "redirectUris": ["http://localhost:3000/auth/callback", "http://localhost:3000/auth/login"],
-      "webOrigins": ["http://localhost:3000"],
+      "redirectUris": ["${LMS_APP_URL:http://localhost:3000}/auth/callback", "${LMS_APP_URL:http://localhost:3000}/auth/login"],
+      "webOrigins": ["${LMS_APP_URL:http://localhost:3000}"],
       "attributes": {
         "pkce.code.challenge.method": "S256",
-        "post.logout.redirect.uris": "http://localhost:3000/*"
+        "post.logout.redirect.uris": "${LMS_APP_URL:http://localhost:3000}/*"
       },
       "defaultClientScopes": ["web-origins", "acr", "profile", "roles", "basic", "email"],
       "optionalClientScopes": ["organization", "offline_access"],
@@ -79,7 +79,7 @@
       "implicitFlowEnabled": false,
       "directAccessGrantsEnabled": false,
       "serviceAccountsEnabled": false,
-      "secret": "lms-api-unused-secret"
+      "secret": "${LMS_API_CLIENT_SECRET:lms-api-unused-secret}"
     },
     {
       "clientId": "lms-admin",
@@ -89,7 +89,7 @@
       "protocol": "openid-connect",
       "publicClient": false,
       "clientAuthenticatorType": "client-secret",
-      "secret": "lms-admin-dev-secret",
+      "secret": "${LMS_ADMIN_CLIENT_SECRET:lms-admin-dev-secret}",
       "standardFlowEnabled": false,
       "implicitFlowEnabled": false,
       "directAccessGrantsEnabled": false,

@@ -5,6 +5,7 @@ import { Panel, SealMark } from "@lms/ui";
 
 import { koreanDate } from "@/lib/learning";
 import { getEnv } from "@/server/env";
+import { upstreamHeaders } from "@/server/upstream";
 
 export const metadata: Metadata = { title: "수료증 진위 확인", robots: { index: false } };
 
@@ -17,7 +18,7 @@ async function lookup(serial: string): Promise<CertificateVerification | null | 
   try {
     const response = await fetch(`${getEnv().API_URL}/v1/public/certificates/${encodeURIComponent(serial)}`, {
       cache: "no-store",
-      headers: { Accept: "application/json" },
+      headers: upstreamHeaders({ Accept: "application/json" }),
     });
     if (response.status === 404) return null;
     if (!response.ok) return "error";

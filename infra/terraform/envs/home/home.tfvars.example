@@ -1,0 +1,6 @@
+# cp home.tfvars.example home.tfvars  (gitignored)
+cloudflare_account_id = "0123456789abcdef0123456789abcdef"
+admin_email           = "you@example.com"
+image_prefix          = "docker.io/yourname"
+upstash_email         = "you@example.com"
+# Not here: CLOUDFLARE_API_TOKEN, VERCEL_API_TOKEN and TF_VAR_upstash_api_key come from the shell.

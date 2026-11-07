@@ -53,16 +53,24 @@ flowchart LR
 
 느린 일은 요청 밖에서 합니다: 수료·배정·리마인더 이벤트를 **같은 트랜잭션으로 아웃박스 테이블**에 적고, 커밋 후 SQS로 보내면 **워커**가 수료증 PDF(OpenHTMLtoPDF, 한글 폰트 내장)를 만들고 메일을 보냅니다. 영상은 MediaConvert가 HLS 3화질로 바꾸고, 완료는 EventBridge → SQS로 받습니다.
 
-AWS 배포 설계(ECS Fargate, RDS, ElastiCache, SQS, S3/CloudFront, MediaConvert, SES, Terraform)와 비용은 [docs/03](docs/03-architecture.md), [docs/08](docs/08-cost-and-limits.md), [Terraform README](infra/terraform/README.md)에 있습니다. **AWS는 코드와 검증까지만 했고, 시연은 로컬에서 합니다.**
+배포는 세 가지 모양이 있고, **코드는 하나**입니다(환경변수만 다름).
 
-| AWS (코드) | 로컬 (시연) | 같은 점 |
-|---|---|---|
-| S3 + CloudFront | S3Mock | S3 API |
-| SQS (+DLQ) | ElasticMQ | SQS API |
-| SES | Mailpit | SMTP |
-| ElastiCache Valkey | Valkey | Redis 프로토콜 |
-| RDS PostgreSQL | PostgreSQL | 같은 엔진, 같은 RLS |
-| MediaConvert | 가짜 변환기(원본 mp4 재생) | `VideoTranscoder` 인터페이스 |
+- **홈 배포 (`bymile.site`, 실제 운영):** 프론트는 **Vercel**, 백엔드는 **미니 PC의 Docker(Portainer 스택)**, 그 앞에 **Cloudflare**(Tunnel·Access·R2)를 둡니다. 비용은 거의 0원입니다. Terraform([envs/home](infra/terraform/envs/home))과 [운영 문서](infra/home/README.md), 선택 이유는 [docs/11](docs/11-home-deployment.md)에 있습니다.
+- **AWS (설계·코드):** ECS Fargate, RDS, ElastiCache, SQS, S3/CloudFront, MediaConvert, SES. 규모가 커질 때 가는 길이며 `validate`까지 했습니다. [docs/03](docs/03-architecture.md), [docs/08](docs/08-cost-and-limits.md), [Terraform README](infra/terraform/README.md)
+- **로컬 (개발·시연 리허설):** 아래 [로컬 실행](#로컬-실행)
+
+| 역할 | AWS (설계) | 홈 배포 (`bymile.site`) | 로컬 | 같은 점 |
+|---|---|---|---|---|
+| 웹 (Next.js BFF) | ECS Fargate + ALB | **Vercel** (서울 함수) | `pnpm dev` | 같은 앱 |
+| API · 워커 · Keycloak | ECS Fargate | **미니 PC Docker** | 호스트 / Docker | 같은 이미지 |
+| 입구와 TLS | ALB + ACM | **Cloudflare Tunnel** (포트 개방 없음) | 없음 | |
+| API 보호 | 공개 주소 없음 (Service Connect) | **Cloudflare Access 서비스 토큰** | 없음 | Vercel만 API를 부를 수 있음 |
+| 파일 | S3 + CloudFront | **Cloudflare R2** | S3Mock | S3 API · presigned URL |
+| 큐 | SQS (+DLQ) | ElasticMQ | ElasticMQ | SQS API |
+| 메일 | SES | Mailpit (Access 뒤) | Mailpit | SMTP |
+| 세션 · 캐시 | ElastiCache Valkey | **Upstash Redis** (세션) · Valkey (캐시) | Valkey | Redis 프로토콜 |
+| DB | RDS PostgreSQL | PostgreSQL | PostgreSQL | 같은 엔진, 같은 RLS |
+| 영상 변환 | MediaConvert | 가짜 변환기 | 가짜 변환기 | `VideoTranscoder` 인터페이스 |
 
 ---
 
@@ -204,7 +212,8 @@ frontend/               pnpm 워크스페이스
 infra/
   local/                Docker Compose, DB 역할 초기화, ElasticMQ 큐 설정
   keycloak/             렐름 설정 (코드로 관리)
-  terraform/            AWS 배포 코드 (bootstrap + demo 환경 + 모듈 7개)
+  terraform/            배포 코드: AWS (bootstrap + demo + 모듈 7개), 홈 (envs/home: Cloudflare·Vercel·Upstash)
+  home/                 미니 PC용 Portainer 스택, 이미지 빌드 스크립트, 로컬 리허설
 docs/                   기획·설계 문서, 디자인 문서, 일별 면접 설명 노트
 DESIGN.md · PRODUCT.md  디자인 계약서, 제품 요약
 .claude/skills/         디자인 작업용 에이전트 스킬 (출처: THIRD_PARTY.md)
@@ -223,7 +232,8 @@ DESIGN.md · PRODUCT.md  디자인 계약서, 제품 요약
 - [x] Day 4: 아웃박스 → SQS → 워커, 수료증 PDF·진위 확인, 메일, 대시보드(회사별 캐시), 감사 로그, MediaConvert HLS·서명 쿠키, 예약 작업(ShedLock)
 - [x] Day 5: 데모 시드(회사 2개), Playwright E2E, 도메인(`bymile.site`)·SES 배포 코드, 예상 질문, 시연 대본
 - [x] AWS 배포 코드: Terraform + Dockerfile (`validate`·이미지 빌드까지, 적용은 안 함) — [infra/terraform](infra/terraform/README.md)
-- [ ] 미룸: CI/CD(저장소 토큰 권한), 실제 AWS 적용·롤백 리허설, OpenTelemetry·Sentry, `compose --profile full`
+- [x] 홈 배포 코드: Vercel + 미니 PC(Portainer) + Cloudflare. 운영 모드 스택을 이 PC에서 리허설해 E2E 통과 — [infra/home](infra/home/README.md)
+- [ ] 미룸: CI/CD(저장소 토큰 권한), 실제 AWS 적용·롤백 리허설, OpenTelemetry·Sentry
 
 ---
 
@@ -247,6 +257,8 @@ DESIGN.md · PRODUCT.md  디자인 계약서, 제품 요약
 | [Day 4 설명 노트](docs/notes/day4.md) | 아웃박스, 멱등 소비자, 수료증 PDF, 진위 확인, 캐시 키 격리, HLS·서명 쿠키 |
 | [Day 5 설명 노트](docs/notes/day5.md) | 시드, E2E가 찾은 버그, 도메인 위임·SES, 미룬 것 |
 | [AWS 배포 코드](infra/terraform/README.md) | Terraform 구조, 설계 결정, 적용 순서, 검증 범위 |
+| [11 홈 배포](docs/11-home-deployment.md) | Vercel + 미니 PC + Cloudflare: 구성, 선택 이유와 대안, AWS 설계와의 대응 |
+| [홈 배포 운영](infra/home/README.md) | 계정 준비 → Terraform → 이미지 푸시 → Portainer 순서, 업데이트·롤백 |
 
 ---
 

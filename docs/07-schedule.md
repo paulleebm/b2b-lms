@@ -120,7 +120,7 @@
 - [ ] **롤백 리허설** — 미룸 (AWS 적용 안 함)
 - [~] CloudWatch 알람(5xx, DLQ, 예산)과 JSON 로그(ECS 형식)는 코드에 있음. OpenTelemetry·Sentry는 미룸
 - [ ] CodeQL, Dependabot, SonarCloud 연결 — 미룸 (CI와 함께)
-- [ ] 노트북 백업 시연 모드(`docker compose --profile full up`) — 미룸 (컨테이너 안 Keycloak 발급자 주소 문제). API·웹은 호스트에서 실행
+- [x] 컨테이너만으로 도는 백엔드: 홈 배포 스택으로 해결 (Keycloak 백채널 + API의 JWKS 내부 주소). 이 PC에서 리허설 가능 — [infra/home](../infra/home/README.md)
 
 **데이터·문서**
 - [x] 시드: 데모 회사 2개(교차 테넌트 시연), 계정 3종, 코스 3개, 다양한 진도의 직원 20명

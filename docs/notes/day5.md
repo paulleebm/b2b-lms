@@ -77,7 +77,7 @@
 | CI/CD (GitHub Actions) | 미룸 | 저장소 토큰에 `workflow` 권한이 없어 올릴 수 없음. OIDC 역할 2개(plan / deploy)는 Terraform에 이미 있음 |
 | 실제 AWS 적용 | 미룸 | 코드와 `validate`까지. 시연은 로컬. 적용 순서는 [Terraform README](../../infra/terraform/README.md) |
 | 롤백 리허설 | 미룸 | 배포 환경이 필요. 회로 차단기(`rollback = true`)는 코드에 있음 |
-| `docker compose --profile full` | 미룸 | 컨테이너 안에서 Keycloak 발급자 주소(`localhost:8080`)가 달라지는 문제를 풀어야 함. 지금은 API·웹을 호스트에서 실행 |
+| `docker compose --profile full` | 해결 (배포 단계) | 컨테이너 안과 브라우저가 Keycloak을 다른 주소로 보는 문제. 홈 배포 스택에서 Keycloak 백채널 + JWKS 내부 주소로 풀었다 ([docs/11](../11-home-deployment.md)) |
 | Chromatic, SonarCloud | 미룸 | CI가 먼저 |
 
 ## 7. 면접에서 이렇게 말한다 (1분)

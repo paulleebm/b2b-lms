@@ -5,6 +5,7 @@ import { z } from "zod";
 import type { ProblemDetails } from "./api-types";
 import { getEnv } from "./env";
 import { getSession } from "./session";
+import { upstreamHeaders } from "./upstream";
 
 /** Non-2xx response from the Spring API, parsed from RFC 9457 problem+json when available. */
 export class ApiError extends Error {
@@ -67,7 +68,7 @@ export async function apiFetchWithEtag<T>(
   const session = await getSession();
   if (!session) throw new UnauthenticatedError();
 
-  const headers = new Headers(init.headers);
+  const headers = upstreamHeaders(init.headers);
   headers.set("Authorization", `Bearer ${session.accessToken}`);
   if (!headers.has("Accept")) headers.set("Accept", "application/json, application/problem+json");
   if (init.body !== undefined && !headers.has("Content-Type")) {

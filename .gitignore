@@ -38,6 +38,9 @@ infra/terraform/**/backend.hcl
 # node_modules that some agent skills ship for local tooling
 .claude/skills/**/node_modules/
 
+# Home deployment: generated stack variables (secrets) for Portainer
+infra/home/stack.env
+
 # Personal local test account (only exists in this machine's Keycloak volume)
 infra/local/dev-accounts.md
 
