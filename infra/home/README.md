@@ -89,6 +89,16 @@ IMAGE_PREFIX=docker.io/paulleebm ./infra/home/build-images.sh
 
 **데이터는 볼륨에 있습니다:** `pgdata`(DB), `garage_meta`·`garage_data`(파일), `caddy_data`(인증서), `valkeydata`(세션), `maildata`. 스택을 지울 때 볼륨까지 지우지 않도록 주의합니다. 정기 백업은 아직 없습니다([docs/11](../../docs/11-home-deployment.md#4-한계와-다음-단계)).
 
+## 데모 데이터 처음 상태로 되돌리기
+
+시연이나 테스트로 데모 데이터가 바뀌었을 때, 또는 시드 계정이 바뀌었을 때 씁니다. 시드는 회사가 이미 있으면 건너뛰므로 DB를 비워야 다시 들어갑니다. DB 볼륨에 Keycloak 계정도 함께 있어서 계정까지 초기화됩니다.
+
+1. **Containers**에서 `lms-`로 시작하는 컨테이너를 모두 **Remove**합니다. 스택을 Stop만 하면 컨테이너가 남고, Docker는 멈춘 컨테이너가 쓰는 볼륨도 "사용 중"으로 보고 지우지 않습니다.
+2. **Volumes**에서 **`lms_pgdata`만** Remove합니다. `lms_caddy_data`(인증서, 지우면 재발급해야 하고 Let's Encrypt는 재발급 횟수를 제한함)와 `lms_garage_*`(파일)는 남깁니다.
+3. **Stacks → lms → Update the stack.** 컨테이너가 새로 만들어지고, `seed`가 데모 데이터를 넣고 exited (0)이 됩니다.
+
+시연 계정은 모두 비밀번호 `1234567890`: `admin@demo.test`(관리자), `teacher@demo.test`(강사), `student@demo.test`(학습자), `admin@other.test`(다른 회사 관리자).
+
 ## 리허설: 같은 스택을 이 PC에서
 
 ```bash
