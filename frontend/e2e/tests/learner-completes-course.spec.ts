@@ -7,9 +7,9 @@ import { signIn } from "../support/auth";
  * finish the remaining lessons → pass the quiz → completed. Uses the seeded demo company
  * (docs: --lms.seed=true). Each run completes one more unfinished course of the account.
  */
-// Not learner@: that account is kept for the live demo. This one starts with two untouched
+// Not student@: that account is kept for the live demo. This one starts with two untouched
 // courses, so two runs complete both; then re-seed (README) or point E2E_LEARNER elsewhere.
-const LEARNER = process.env.E2E_LEARNER ?? "dohyun.yoon@demo-elec.test";
+const LEARNER = process.env.E2E_LEARNER ?? "dohyun.yoon@demo.test";
 
 test("학습자가 남은 레슨을 마치고 퀴즈를 통과해 수료한다", async ({ page }) => {
   await signIn(page, LEARNER);
@@ -53,7 +53,7 @@ test("학습자가 남은 레슨을 마치고 퀴즈를 통과해 수료한다",
 });
 
 test("관리자 대시보드에서 미이수자와 부서별 수료율을 본다", async ({ page }) => {
-  await signIn(page, "admin@demo-elec.test");
+  await signIn(page, "admin@demo.test");
   await page.goto("/app/dashboard");
   await expect(page.getByRole("heading", { name: "교육 현황" })).toBeVisible();
   await expect(page.getByRole("heading", { name: "처리가 필요한 직원" })).toBeVisible();

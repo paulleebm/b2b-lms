@@ -8,13 +8,13 @@ import { signIn } from "../support/auth";
  * README screenshots from the running app with the seeded demo data (not from Storybook), so
  * the pictures show what the demo shows. Writes docs/images/*.png. Run on purpose only:
  *   playwright test --config playwright.screenshots.config.ts
- * It completes one course of COMPLETION_LEARNER (not learner@, which is kept for the live demo).
+ * It completes one course of COMPLETION_LEARNER (not student@, which is kept for the live demo).
  */
 const IMAGES = path.join(__dirname, "../../../docs/images");
-const COMPLETION_LEARNER = process.env.COMPLETION_LEARNER ?? "minjun.choi@demo-elec.test";
+const COMPLETION_LEARNER = process.env.COMPLETION_LEARNER ?? "minjun.choi@demo.test";
 
 async function dashboard(page: Page) {
-  await signIn(page, "admin@demo-elec.test");
+  await signIn(page, "admin@demo.test");
   await page.goto("/app/dashboard");
   await expect(page.getByRole("table", { name: "처리가 필요한 직원" })).toBeVisible();
   await page.evaluate(() => document.fonts.ready);

@@ -28,10 +28,10 @@ import org.springframework.transaction.support.TransactionTemplate;
  * Demo data for the interview (local only): {@code ./gradlew bootRun --args='--lms.seed=true --server.port=0'}.
  *
  * <ul>
- *   <li>데모전자 (demo-elec): admin, instructor, learner + 17 employees in 4 departments, 3 published
+ *   <li>데모전자 (demo-elec, @demo.test): admin, teacher, student + 17 employees in 4 departments, 3 published
  *       courses, assignments with deadlines, and enrollments at every stage (done with certificate,
  *       in progress, not started, overdue).</li>
- *   <li>데모물산 (demo-trade): a second, small company — sign in to both to show they never see each other.</li>
+ *   <li>데모물산 (demo-trade, @other.test): a second, small company — sign in to both to show they never see each other.</li>
  * </ul>
  * Keycloak accounts get a known dev password (README). Data goes in with plain SQL inside each
  * company's tenant context, so RLS applies to the seeder too. Re-running skips existing companies.
@@ -40,7 +40,8 @@ import org.springframework.transaction.support.TransactionTemplate;
 @ConditionalOnProperty(name = "lms.seed", havingValue = "true")
 class DemoSeeder implements ApplicationRunner {
 
-    static final String PASSWORD = "Demo-2026-lms";   // realm policy: 10+ characters
+    // Easy to type in a demo; the realm policy (10+ characters) still holds for real accounts.
+    static final String PASSWORD = "1234567890";
     private static final Logger log = LoggerFactory.getLogger(DemoSeeder.class);
     private static final SecureRandom RANDOM = new SecureRandom();
     private static final char[] CROCKFORD = "0123456789ABCDEFGHJKMNPQRSTVWXYZ".toCharArray();
@@ -62,10 +63,10 @@ class DemoSeeder implements ApplicationRunner {
 
     @Override
     public void run(ApplicationArguments args) {
-        seed("데모전자", "demo-elec", List.of(
+        seed("데모전자", "demo-elec", "demo.test", List.of(
                 new Person("김", "하나", "admin", "ORG_ADMIN", "인사팀"),
-                new Person("이", "도윤", "instructor", "INSTRUCTOR", "인사팀"),
-                new Person("박", "서연", "learner", "LEARNER", "개발팀"),
+                new Person("이", "도윤", "teacher", "INSTRUCTOR", "인사팀"),
+                new Person("박", "서연", "student", "LEARNER", "개발팀"),
                 new Person("최", "민준", "minjun.choi", "LEARNER", "개발팀"),
                 new Person("정", "지우", "jiwoo.jung", "LEARNER", "개발팀"),
                 new Person("강", "하준", "hajun.kang", "LEARNER", "개발팀"),
@@ -83,7 +84,7 @@ class DemoSeeder implements ApplicationRunner {
                 new Person("송", "준서", "junseo.song", "LEARNER", "재무팀"),
                 new Person("류", "하은", "haeun.ryu", "LEARNER", "재무팀"),
                 new Person("홍", "지호", "jiho.hong", "LEARNER", "개발팀")), true);
-        seed("데모물산", "demo-trade", List.of(
+        seed("데모물산", "demo-trade", "other.test", List.of(
                 new Person("백", "승민", "admin", "ORG_ADMIN", "경영지원팀"),
                 new Person("문", "유나", "yuna.moon", "LEARNER", "경영지원팀"),
                 new Person("배", "현우", "hyunwoo.bae", "LEARNER", "물류팀"),
@@ -92,12 +93,11 @@ class DemoSeeder implements ApplicationRunner {
         System.exit(SpringApplication.exit(context, () -> 0));
     }
 
-    private void seed(String name, String slug, List<Person> people, boolean full) {
+    private void seed(String name, String slug, String domain, List<Person> people, boolean full) {
         if (jdbc.sql("select count(*) from tenant where slug = ?").param(slug).query(Long.class).single() > 0) {
             log.info("{} already exists, skipping", slug);
             return;
         }
-        String domain = slug + ".test";
         // Accounts first (idempotent: re-running after a failure reuses them), the organization and
         // the tenant row last, so a failed run leaves nothing that makes the next run skip.
         Map<Person, String> subs = new LinkedHashMap<>();

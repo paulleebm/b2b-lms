@@ -1,7 +1,7 @@
 import { expect, type Page } from "@playwright/test";
 
 /** Every seeded demo account (backend DemoSeeder.PASSWORD). Local only. */
-export const DEMO_PASSWORD = "Demo-2026-lms";
+export const DEMO_PASSWORD = "1234567890";
 
 /** Keycloak's login theme asks for the email first, then the password on the next page. */
 export async function signIn(page: Page, email: string) {

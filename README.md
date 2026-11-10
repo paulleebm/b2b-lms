@@ -159,12 +159,12 @@ cd frontend && pnpm --filter @lms/ui storybook
 cd backend && ./gradlew bootRun --args='--lms.seed=true --server.port=0'
 ```
 
-| 데모 계정 (비밀번호 모두 `Demo-2026-lms`, 로컬 전용) | 역할 |
+| 데모 계정 (비밀번호 모두 `1234567890`) | 역할 |
 |---|---|
-| `admin@demo-elec.test` | 데모전자 관리자: 교육 현황, 배정, 리마인더, 감사 로그 |
-| `instructor@demo-elec.test` | 데모전자 강사: 코스 스튜디오, 퀴즈 |
-| `learner@demo-elec.test` | 데모전자 학습자: 학습 → 퀴즈 → 수료증 |
-| `admin@demo-trade.test` | 데모물산 관리자: 교차 테넌트 확인 (데모전자가 보이지 않는다) |
+| `admin@demo.test` | 데모전자 관리자: 교육 현황, 배정, 리마인더, 감사 로그 |
+| `teacher@demo.test` | 데모전자 강사: 코스 스튜디오, 퀴즈 |
+| `student@demo.test` | 데모전자 학습자: 학습 → 퀴즈 → 수료증 |
+| `admin@other.test` | 데모물산 관리자: 교차 테넌트 확인 (데모전자가 보이지 않는다) |
 
 시드 없이 시작하면 **회사 등록하기 → Keycloak 회원가입 → 회사 정보 입력** 순서로 첫 관리자가 됩니다. 시연 순서와 데이터 초기화 방법은 [docs/10](docs/10-demo-script.md)에 있습니다.
 

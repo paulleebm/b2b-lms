@@ -71,7 +71,7 @@ IMAGE_PREFIX=docker.io/paulleebm ./infra/home/build-images.sh
 - `storage-init`, `seed`는 **exited (0)**: 저장소 준비와 데모 데이터 넣기를 마치고 끝난 상태입니다.
 - `caddy` 로그에 `certificate obtained successfully`가 도메인 4개만큼 보입니다. 안 보이면 0단계(포트포워딩, DNS)를 다시 확인합니다.
 
-그다음 https://app.bymile.site 에서 `learner@demo-elec.test` / `Demo-2026-lms`로 로그인합니다.
+그다음 https://app.bymile.site 에서 `student@demo.test` / `1234567890`로 로그인합니다.
 
 **휴대폰 LTE(집 밖 네트워크)로 한 번 확인합니다:** https://auth.bymile.site/admin 과 https://inbox.bymile.site 가 **404**여야 합니다. Caddy는 요청의 출발지 IP로 집 안인지 판단하는데, Docker가 출발지 IP를 바꿔 전달하는 환경이면(예: IPv6로 들어온 요청) 바깥 요청도 집 안처럼 보일 수 있기 때문입니다. 그래서 DNS에는 IPv4(A 레코드)만 넣습니다.
 
