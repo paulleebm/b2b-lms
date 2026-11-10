@@ -10,5 +10,5 @@ export async function signIn(page: Page, email: string) {
   await page.locator('[type="submit"]').first().click();
   await page.locator('input[name="password"]').fill(DEMO_PASSWORD);
   await page.locator('[type="submit"]').first().click();
-  await expect(page).toHaveURL(/localhost:3000\/app$/);
+  await expect(page).toHaveURL("/app"); // resolved against baseURL: back on our origin, not Keycloak's
 }

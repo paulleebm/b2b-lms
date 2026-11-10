@@ -16,7 +16,7 @@ B2B 멀티테넌트 사내교육 LMS의 기획·설계 문서다. 모든 결정�
 | [08-cost-and-limits.md](08-cost-and-limits.md) | AWS 비용, 시연으로는 무리인 것, 표준에서 벗어난 곳 |
 | [09-interview-qa.md](09-interview-qa.md) | 예상 질문과 답 18문항 |
 | [10-demo-script.md](10-demo-script.md) | 5분 시연 대본, 아키텍처 1분, 리허설 체크리스트 |
-| [11-home-deployment.md](11-home-deployment.md) | 실제 배포: Vercel + 미니 PC(Docker) + Cloudflare. 선택 이유, 대안, AWS 설계와의 대응 |
+| [11-home-deployment.md](11-home-deployment.md) | 실제 배포: 미니 PC 한 대(Docker, Caddy, Garage). 선택 이유, 대안, AWS 설계와의 대응 |
 | [notes/](notes/) | 일별 면접 설명 노트 (Day 1~5) |
 | [../DESIGN.md](../DESIGN.md) | 디자인 계약서 "인장과 이수증": 색·서체·컴포넌트·상태·접근성 규칙과 이유 |
 | [../PRODUCT.md](../PRODUCT.md) | 디자인 도구가 읽는 제품 요약 |

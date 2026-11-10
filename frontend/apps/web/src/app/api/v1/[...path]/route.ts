@@ -2,7 +2,6 @@ import { NextResponse, type NextRequest } from "next/server";
 
 import { getEnv } from "@/server/env";
 import { getSession } from "@/server/session";
-import { upstreamHeaders } from "@/server/upstream";
 
 /**
  * BFF pass-through for client components: browser → (session cookie) → here → (Bearer token) → API.
@@ -36,7 +35,7 @@ async function forward(request: NextRequest, { params }: { params: Promise<{ pat
   const session = await getSession();
   if (!session) return problem(401, "UNAUTHENTICATED", "로그인이 필요합니다.");
 
-  const headers = upstreamHeaders({ Authorization: `Bearer ${session.accessToken}` });
+  const headers = new Headers({ Authorization: `Bearer ${session.accessToken}` });
   for (const name of REQUEST_HEADERS) {
     const value = request.headers.get(name);
     if (value) headers.set(name, value);

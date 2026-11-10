@@ -14,13 +14,6 @@ export const envSchema = z.object({
   KEYCLOAK_CLIENT_SECRET: z.string().min(1),
   REDIS_URL: z.url({ protocol: /^rediss?$/ }),
   API_URL: httpUrl,
-  // Home deployment: the API sits behind Cloudflare Access, which admits only requests that carry
-  // this service token (the Vercel BFF). Unset locally and in AWS, where the API has no public address.
-  CF_ACCESS_CLIENT_ID: z.string().min(1).optional(),
-  CF_ACCESS_CLIENT_SECRET: z.string().min(1).optional(),
-}).refine((env) => !env.CF_ACCESS_CLIENT_ID === !env.CF_ACCESS_CLIENT_SECRET, {
-  message: "Set both CF_ACCESS_CLIENT_ID and CF_ACCESS_CLIENT_SECRET, or neither",
-  path: ["CF_ACCESS_CLIENT_SECRET"],
 });
 
 export type Env = z.infer<typeof envSchema>;

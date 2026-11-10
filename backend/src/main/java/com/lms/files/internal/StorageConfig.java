@@ -19,7 +19,7 @@ import software.amazon.awssdk.services.s3.presigner.S3Presigner;
  * <ul>
  *   <li>AWS: the ECS task role supplies short-lived credentials (DefaultCredentialsProvider);
  *       no access keys exist anywhere in configuration.</li>
- *   <li>Home: Cloudflare R2 (S3 API) with an R2 API token's key pair from the stack's env.</li>
+ *   <li>Home: Garage (S3 API) on the mini PC, with an access key pair from the stack's env.</li>
  *   <li>Local: S3Mock with dummy keys.</li>
  * </ul>
  */

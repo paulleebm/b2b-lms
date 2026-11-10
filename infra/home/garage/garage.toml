@@ -1,0 +1,19 @@
+# Garage: S3-compatible object storage for the home stack (one node). Secrets are not here:
+# GARAGE_RPC_SECRET and GARAGE_ADMIN_TOKEN come from the stack's environment.
+metadata_dir = "/var/lib/garage/meta"
+data_dir = "/var/lib/garage/data"
+db_engine = "lmdb"
+
+# One node, one copy. The upstream docs call this "test deployments only": a disk failure loses
+# the files. The fix is a backup job (or two more nodes), not a setting; see docs/11.
+replication_factor = 1
+
+rpc_bind_addr = "[::]:3901"
+rpc_public_addr = "127.0.0.1:3901"
+
+[s3_api]
+s3_region = "garage"           # the API signs requests for this region (AWS_REGION in the stack)
+api_bind_addr = "[::]:3900"    # reached only through Caddy (files.<domain>) and the Docker network
+
+[admin]
+api_bind_addr = "[::]:3903"    # Docker network only: used once by storage-init

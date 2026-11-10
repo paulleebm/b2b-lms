@@ -1,0 +1,57 @@
+# Caddy: the only container with published ports (80, 443). Every name below is a Gabia DNS
+# record pointing at the home IP; the router forwards 80/443 to the mini PC.
+#
+#   app.<domain>    → web (Next.js BFF). The API has no public name: the BFF calls it inside Docker.
+#   auth.<domain>   → Keycloak login pages. Admin console only from the home network.
+#   files.<domain>  → Garage (S3 API). Browsers upload/download with presigned URLs.
+#   inbox.<domain>  → Mailpit (demo mailbox). Home network only.
+#
+# With PUBLIC_SCHEME=https Caddy obtains and renews Let's Encrypt certificates by itself (it needs
+# port 80 or 443 reachable from the internet) and redirects HTTP to HTTPS. The rehearsal sets
+# PUBLIC_SCHEME=http and *.localhost names, which turns TLS off.
+# {$NAME} is replaced from the container's environment when Caddy starts.
+
+(home_only) {
+	@outside not remote_ip private_ranges
+}
+
+{$PUBLIC_SCHEME}://{$APP_HOST} {
+	encode zstd gzip
+	reverse_proxy web:3000
+}
+
+{$PUBLIC_SCHEME}://{$AUTH_HOST} {
+	# The admin console and the master realm (the admin login) are not for the internet: the
+	# AWS design's ALB blocks /admin outright; here the owner can still reach it from home.
+	@admin_outside {
+		path /admin /admin/* /realms/master /realms/master/*
+		not remote_ip private_ranges
+	}
+	respond @admin_outside 404
+	reverse_proxy keycloak:8080
+}
+
+{$PUBLIC_SCHEME}://{$FILES_HOST} {
+	# CORS for the app's origin, answered here instead of by bucket rules (one place, no S3 call).
+	# Uploads: PUT with content-type/content-md5; multipart: the browser reads each part's ETag.
+	header {
+		Access-Control-Allow-Origin "{$PUBLIC_SCHEME}://{$APP_HOST}"
+		Access-Control-Expose-Headers "ETag"
+		Vary "Origin"
+	}
+	@preflight method OPTIONS
+	handle @preflight {
+		header Access-Control-Allow-Methods "GET, PUT, HEAD"
+		header Access-Control-Allow-Headers "content-type, content-md5"
+		header Access-Control-Max-Age "3600"
+		respond 204
+	}
+	# Host is passed through unchanged, so the presigned signature (signed for this name) checks out.
+	reverse_proxy garage:3900
+}
+
+{$PUBLIC_SCHEME}://{$INBOX_HOST} {
+	import home_only
+	respond @outside 404
+	reverse_proxy mailpit:8025
+}

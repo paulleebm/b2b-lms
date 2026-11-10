@@ -1,38 +1,12 @@
 # Rehearsal: run the exact home stack on this machine before pushing anything.
-#   IMAGE_PREFIX=local LOAD=1 ./infra/home/build-images.sh
+#   IMAGE_PREFIX=local LOAD=1 PUBLIC_SCHEME=http DOMAIN=localhost ./infra/home/build-images.sh
 #   docker compose -p lms-rehearsal --env-file infra/home/rehearsal/rehearsal.env \
 #     -f infra/home/docker-compose.yml -f infra/home/rehearsal/compose.rehearsal.yml up -d
-# Differences from the real stack, and only these: no tunnel (ports published on localhost
-# instead), HTTP hostnames instead of https://*.bymile.site, and S3Mock instead of R2. S3Mock is
-# reached as host.docker.internal:19090 by both the containers and the browser, the way R2 has one
-# public host for both (presigned URLs are signed for the host the API talks to).
+#   → http://app.localhost (browsers resolve *.localhost to this machine by themselves)
+#
+# Differences from the real stack, and only these: HTTP and *.localhost names instead of HTTPS and
+# *.bymile.site (so no certificates), and caddy listens on this machine's loopback only.
 services:
-  keycloak:
-    environment:
-      KC_HOSTNAME: http://localhost:18080
-      LMS_APP_URL: http://localhost:3000
-    ports: ["127.0.0.1:18080:8080"]
-  api:
-    environment:
-      KEYCLOAK_ISSUER: http://localhost:18080/realms/lms
-      APP_URL: http://localhost:3000
-    ports: ["127.0.0.1:18081:8081"]
-  worker:
-    environment:
-      KEYCLOAK_ISSUER: http://localhost:18080/realms/lms
-      APP_URL: http://localhost:3000
-  seed:
-    environment:
-      KEYCLOAK_ISSUER: http://localhost:18080/realms/lms
-      APP_URL: http://localhost:3000
-  valkey:
-    ports: ["127.0.0.1:16379:6379"]
-  mailpit:
-    ports: ["127.0.0.1:18025:8025"]
-  s3mock:
-    image: adobe/s3mock:5.2.3
-    environment:
-      COM_ADOBE_TESTING_S3MOCK_STORE_INITIAL_BUCKETS: lms-media-rehearsal
-    ports: ["127.0.0.1:19090:9090"]
-  cloudflared:
-    profiles: ["tunnel"]   # not started in a rehearsal
+  caddy:
+    ports: !override
+      - "127.0.0.1:80:80"

@@ -56,6 +56,12 @@ export function scopeFor(orgAlias?: string): string {
   return [...BASE_SCOPES, orgAlias ? `organization:${orgAlias}` : "organization"].join(" ");
 }
 
+/** Loopback names: "localhost" and its subdomains (RFC 6761), used by the home-stack rehearsal. */
 function isLocalHost(hostname: string): boolean {
-  return hostname === "localhost" || hostname === "127.0.0.1" || hostname === "[::1]";
+  return (
+    hostname === "localhost" ||
+    hostname.endsWith(".localhost") ||
+    hostname === "127.0.0.1" ||
+    hostname === "[::1]"
+  );
 }

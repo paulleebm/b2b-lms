@@ -2,7 +2,7 @@
 #
 # Tokens carry the public issuer (https://auth.bymile.site/realms/lms), but the signing keys are
 # fetched over the Docker network from the Keycloak container instead of going out through
-# Cloudflare and back in. The issuer is still checked against issuer-uri.
+# the reverse proxy and back in. The issuer is still checked against issuer-uri.
 spring:
   security:
     oauth2:
@@ -12,6 +12,6 @@ spring:
 
 springdoc:
   api-docs:
-    enabled: false   # the API is behind Cloudflare Access; no public schema browsing
+    enabled: false   # production: no schema browsing (the API has no public name anyway)
   swagger-ui:
     enabled: false
