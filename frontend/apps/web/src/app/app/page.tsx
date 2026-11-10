@@ -12,7 +12,7 @@ export const metadata: Metadata = { title: "내 교육" };
 
 /**
  * Everyone's home is "내 교육": admins and instructors take required courses too.
- * Open courses first (the API sorts by due date), then completed ones with their seal.
+ * Open courses first (the API sorts by due date), then completed ones with a check mark.
  */
 export default async function AppHomePage() {
   const me = await requireMe();

@@ -15,7 +15,7 @@ import {
   PanelBody,
   PanelFooter,
   PanelHeader,
-  SealMark,
+  CompletionMark,
   Skeleton,
   cn,
 } from "@lms/ui";
@@ -140,7 +140,7 @@ export function QuizRunner({ enrollmentId }: { enrollmentId: string }) {
         {result ? (
           <Panel>
             <div className="flex flex-col items-center gap-4 px-6 py-8 text-center" role="status">
-              {result.courseCompleted ? <SealMark size="lg" stamp /> : null}
+              {result.courseCompleted ? <CompletionMark size="lg" /> : null}
               <div className="grid gap-1">
                 <p className="text-title font-semibold text-ink">
                   {result.passed ? "통과했습니다" : result.expired ? "제한 시간이 지나 0점 처리되었습니다" : "통과하지 못했습니다"}

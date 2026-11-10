@@ -7,7 +7,7 @@ import { AppShell, PageHeader } from "../components/app-shell";
 import { Button } from "../components/button";
 import { Panel, PanelBody, PanelHeader } from "../components/panel";
 import { Progress } from "../components/progress";
-import { SealMark } from "../components/seal-mark";
+import { CompletionMark } from "../components/completion-mark";
 import { Badge, StatusBadge } from "../components/status-badge";
 import { EmptyState, ErrorState, LoadingRegion, Skeleton } from "../components/states";
 import { completedCourses, formatDue, learnerCourses, type LearnerCourse } from "./fixtures";
@@ -15,8 +15,8 @@ import { AccountArea, WorkspaceSwitcher, learnerNav } from "./shell-presets";
 
 /**
  * Learner "내 교육" — product principle 2: one next task at the top (Hick's law),
- * then the rest. Completed courses carry the seal; a course completed just now plays
- * the stamp once (the only authored motion in the product).
+ * then the rest. Completed courses carry a check mark; a course completed just now gets
+ * a completion panel on top.
  */
 type ScreenState = "populated" | "loading" | "empty" | "error" | "just-completed";
 
@@ -88,10 +88,10 @@ function CourseRow({ course }: { course: LearnerCourse }) {
   );
 }
 
-function CompletedRow({ course, stamp = false }: { course: LearnerCourse; stamp?: boolean }) {
+function CompletedRow({ course }: { course: LearnerCourse }) {
   return (
     <li className="flex items-center gap-4 px-5 py-4">
-      <SealMark size="md" stamp={stamp} completedAt={course.completedAt} />
+      <CompletionMark size="md" completedAt={course.completedAt} />
       <div className="grid min-w-0 flex-1 gap-0.5">
         <p className="truncate text-body font-medium text-ink">{course.title}</p>
         <p className="text-label text-muted">
@@ -120,7 +120,7 @@ function JustCompleted({ course }: { course: LearnerCourse }) {
   return (
     <Panel aria-labelledby="done-title">
       <div className="flex flex-col items-center gap-4 px-6 py-10 text-center" role="status">
-        <SealMark size="lg" stamp completedAt={course.completedAt} />
+        <CompletionMark size="lg" completedAt={course.completedAt} />
         <div className="grid gap-1">
           <h2 id="done-title" className="text-title font-semibold text-ink">
             수료했습니다

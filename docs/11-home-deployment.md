@@ -100,7 +100,8 @@ flowchart LR
 | Playwright E2E (로그인 → 레슨 → 퀴즈 → 수료, 관리자 대시보드) | 2개 통과 |
 | 브라우저 업로드 (presigned PUT, CORS, CSP 그대로) | 단일 파일과 멀티파트(101 MiB, 7파트, ETag 읽기) 모두 통과 |
 | 웹 `tsc`·lint, Caddyfile `validate`(https·http) | 통과 |
-| 실제 인증서 발급, 포트포워딩, 바깥에서 `/admin` 404 | 공유기·DNS 설정 뒤 확인 (사용자 단계) |
+| 실제 배포 (2026-11-10, Portainer) | 통과. Let's Encrypt 인증서 4개 자동 발급, HTTP → HTTPS 리다이렉트, 학습자 로그인 → `auth.bymile.site` → 대시보드, 콘솔 오류 없음 |
+| 바깥(LTE)에서 `/admin`·메일함 404 | 휴대폰으로 확인할 일 (집 안 PC에서는 사설 IP로 보여 열리는 것이 정상) |
 
 ## 4. 한계와 다음 단계
 

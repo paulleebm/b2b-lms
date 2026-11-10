@@ -4,6 +4,7 @@ import * as React from "react";
 import { Menu, X, type LucideIcon } from "lucide-react";
 
 import { cn } from "../lib/utils";
+import { BrandMark } from "./brand-mark";
 import { Button } from "./button";
 
 /**
@@ -104,11 +105,8 @@ function AppShell({ product = "LMS", workspace, sections, account, linkAs, child
   }, [menuOpen]);
 
   const brand = (
-    <div className="flex h-14 items-center gap-2 px-5">
-      <span className="grid size-6 place-items-center rounded-seal border-[1.5px] border-shell-fg/80 text-[10px] font-extrabold text-shell-fg">
-        學
-      </span>
-      <span className="text-body-sm font-semibold tracking-wide text-shell-fg">{product}</span>
+    <div className="flex h-14 items-center px-5">
+      <BrandMark name={product} tone="shell" />
     </div>
   );
 

@@ -14,7 +14,7 @@ import {
   Panel,
   PanelBody,
   Progress,
-  SealMark,
+  CompletionMark,
   Skeleton,
 } from "@lms/ui";
 
@@ -108,7 +108,7 @@ export function LessonPlayer({ enrollmentId, lessonId }: { enrollmentId: string;
         {progress?.courseCompleted ? (
           <Panel>
             <div className="flex flex-col items-center gap-4 px-6 py-8 text-center" role="status">
-              <SealMark size="lg" stamp />
+              <CompletionMark size="lg" />
               <div className="grid gap-1">
                 <p className="text-title font-semibold text-ink">코스를 수료했습니다</p>
                 {progress.certificateSerial ? (

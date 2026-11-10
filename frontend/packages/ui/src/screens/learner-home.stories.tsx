@@ -12,7 +12,7 @@ const meta = {
 export default meta;
 type Story = StoryObj<typeof meta>;
 
-/** One next task on top (Hick's law), then the rest; completed courses carry the seal. */
+/** One next task on top (Hick's law), then the rest; completed courses carry a check mark. */
 export const Populated: Story = {
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);
@@ -21,7 +21,7 @@ export const Populated: Story = {
   },
 };
 
-/** The product's single authored moment: the seal is stamped once. */
+/** Right after the last lesson or quiz: a completion panel with the certificate on top. */
 export const JustCompleted: Story = { args: { state: "just-completed" } };
 
 export const Loading: Story = { args: { state: "loading" } };

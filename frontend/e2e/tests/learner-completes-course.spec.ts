@@ -4,7 +4,7 @@ import { signIn } from "../support/auth";
 
 /**
  * Scenario 6–7 as a learner would do it: sign in (email-first Keycloak login) → "내 교육" →
- * finish the remaining lessons → pass the quiz → the seal. Uses the seeded demo company
+ * finish the remaining lessons → pass the quiz → completed. Uses the seeded demo company
  * (docs: --lms.seed=true). Each run completes one more unfinished course of the account.
  */
 // Not learner@: that account is kept for the live demo. This one starts with two untouched

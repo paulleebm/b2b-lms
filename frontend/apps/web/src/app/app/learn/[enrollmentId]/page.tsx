@@ -13,7 +13,7 @@ import {
   PanelBody,
   PanelHeader,
   Progress,
-  SealMark,
+  CompletionMark,
   StatusBadge,
 } from "@lms/ui";
 
@@ -76,7 +76,7 @@ export default async function CoursePage({
         {completed ? (
           <Panel aria-labelledby="done-title">
             <div className="flex flex-col items-center gap-4 px-6 py-10 text-center">
-              <SealMark size="lg" completedAt={course.completedAt ? koreanDate(course.completedAt) : undefined} />
+              <CompletionMark size="lg" completedAt={course.completedAt ? koreanDate(course.completedAt) : undefined} />
               <div className="grid gap-1">
                 <h2 id="done-title" className="text-title font-semibold text-ink">
                   수료했습니다

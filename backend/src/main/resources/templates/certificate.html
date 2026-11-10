@@ -4,12 +4,15 @@
   <meta charset="UTF-8"/>
   <title>수료증</title>
   <style>
-    /* A4 landscape. Tokens from DESIGN.md: paper, ink, seal (completion only). */
+    /* A4 landscape, plain certificate layout. Colors from DESIGN.md: paper, ink, muted. */
     @page { size: 297mm 210mm; margin: 0; }
     body { margin: 0; font-family: 'Pretendard'; color: #1D2738; background: #F7F7F4; }
     .sheet { position: relative; width: 297mm; height: 210mm; box-sizing: border-box; padding: 22mm 26mm; }
-    .frame { position: absolute; top: 10mm; left: 10mm; right: 10mm; bottom: 10mm; border: 0.6mm solid #1D2738; }
-    .frame-inner { position: absolute; top: 12.5mm; left: 12.5mm; right: 12.5mm; bottom: 12.5mm; border: 0.25mm solid #7F848E; }
+    /* OpenHTMLtoPDF ignores right/bottom on absolute boxes for sizing: give width/height explicitly. */
+    .frame { position: absolute; top: 10mm; left: 10mm; width: 277mm; height: 190mm; box-sizing: border-box;
+             border: 0.6mm solid #1D2738; }
+    .frame-inner { position: absolute; top: 12.5mm; left: 12.5mm; width: 272mm; height: 185mm; box-sizing: border-box;
+                   border: 0.25mm solid #7F848E; }
     .company { font-size: 11pt; letter-spacing: 0.3em; color: #4A5261; }
     h1 { margin: 14mm 0 0 0; font-size: 40pt; font-weight: 700; letter-spacing: 0.5em; }
     .holder { margin-top: 16mm; font-size: 24pt; font-weight: 700; }
@@ -17,9 +20,9 @@
     .body { margin-top: 8mm; font-size: 13pt; line-height: 1.8; width: 175mm; }
     .course { font-weight: 700; }
     .meta { position: absolute; left: 26mm; bottom: 24mm; font-size: 10pt; color: #4A5261; line-height: 1.7; }
-    .seal { position: absolute; right: 30mm; bottom: 26mm; width: 34mm; height: 34mm; border: 1.2mm solid #BF4A17;
-            border-radius: 2mm; color: #BF4A17; text-align: center; transform: rotate(-6deg); }
-    .seal span { display: block; font-size: 20pt; font-weight: 700; line-height: 1.15; padding-top: 4.5mm; }
+    .issuer { position: absolute; left: 191mm; width: 80mm; bottom: 24mm; text-align: right; }
+    .issuer .date { font-size: 12pt; color: #4A5261; }
+    .issuer .name { margin-top: 3mm; padding-top: 3mm; border-top: 0.3mm solid #7F848E; font-size: 18pt; font-weight: 700; }
   </style>
 </head>
 <body>
@@ -38,7 +41,10 @@
     <div>수료번호 <span th:text="${c.serial}">LMS-2026-XXXXXXXX</span></div>
     <div>진위 확인 <span th:text="${c.verifyUrl}">https://app.example.com/verify/…</span></div>
   </div>
-  <div class="seal"><span>수<br/>료</span></div>
+  <div class="issuer">
+    <div class="date" th:text="${c.issuedDate}">2026년 11월 6일</div>
+    <div class="name" th:text="${c.companyName}">에이크미</div>
+  </div>
 </div>
 </body>
 </html>

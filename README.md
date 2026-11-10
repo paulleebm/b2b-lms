@@ -8,11 +8,11 @@
 
 <table>
   <tr>
-    <td width="58%"><img src="docs/images/learner-completed.png" alt="학습자 — 수료 순간에 인장이 찍힘" /></td>
+    <td width="58%"><img src="docs/images/learner-completed.png" alt="학습자 — 퀴즈를 통과해 수료한 화면" /></td>
     <td width="42%"><img src="docs/images/admin-mobile.png" alt="모바일 관리자 화면" /></td>
   </tr>
   <tr>
-    <td>학습자: 수료하는 순간 인장이 한 번 찍힙니다</td>
+    <td>학습자: 퀴즈를 통과하면 바로 수료되고 수료번호가 나옵니다</td>
     <td>모바일: 사이드바는 시트로, 표는 첫 열 고정 가로 스크롤</td>
   </tr>
 </table>
@@ -82,7 +82,7 @@ flowchart LR
 | 데이터 | **PostgreSQL + JPA(Hibernate) + Flyway** | MySQL 대신 Postgres를 고른 결정적 이유는 RLS |
 | 인증 | **Keycloak (Organizations)** | "인증은 직접 만들지 않는다". 이메일 우선 로그인·회사 SSO·MFA를 설정으로 |
 | 웹 | **Next.js 16 (App Router) + BFF** | 토큰을 브라우저에 두지 않는 IETF 권장 방식, 서버 컴포넌트로 렌더링 |
-| UI | **자체 디자인 시스템 `@lms/ui` (Tailwind v4, Radix)** | shadcn 기본 테마 대신 직접 정한 방향 "인장과 이수증" |
+| UI | **자체 디자인 시스템 `@lms/ui` (Tailwind v4, Radix)** | shadcn 기본 테마 대신 직접 정한 토큰과 규칙 ([DESIGN.md](DESIGN.md)) |
 | 디자인 검증 | **Storybook 10 + Vitest(Chromium) + axe** | 접근성 위반이 있으면 테스트 실패 |
 | 비동기 | **Spring Modulith 이벤트 레지스트리 + SQS + ShedLock** | 아웃박스를 직접 만들지 않음. Kafka(Debezium)는 이 규모에 과함 |
 | 문서 생성 | **Thymeleaf + OpenHTMLtoPDF** | iText는 AGPL. LGPL + HTML/CSS 디자인 + 한글 폰트 내장 |
@@ -93,15 +93,15 @@ flowchart LR
 
 ---
 
-## 디자인: "인장과 이수증"
+## 디자인: 조용한 업무 도구
 
-<img src="docs/images/seal-mark.png" alt="수료 인장 sm·md·lg" width="560" />
+<img src="docs/images/landing.png" alt="첫 화면: 가운데 제목, 관리자 대시보드 예시 화면" width="720" />
 
-인사팀이 다루는 공문서·결재·이수증의 언어에서 가져온 방향입니다. **수료를 회사의 공식 기록으로** 다룬다는 제품의 핵심을 시각 언어로 옮겼습니다.
+처음 보는 사람이 설명 없이 알아보는 **보편적인 업무 도구 모양**을 택했습니다. 처음에는 "수료 인장"을 대표 연출로 두었지만, 낯설어서 제품보다 도장을 먼저 설명하게 만들어 2026-11-10에 버렸습니다([DESIGN.md](DESIGN.md) 변경 기록).
 
 - **먹남색 셸**이 브랜드를 지고, **남청 강조색은 화면당 2곳 이하**
-- **인주색 인장은 수료와 수료증에만**. 인장이 보이면 언제나 "끝났고, 기록됐다"
-- 업무 화면에서 세계관이 빌려주는 것은 색·서체·밀도·대표 연출 하나뿐. 내비게이션과 컨트롤은 표준 그대로
+- 수료는 다른 성공처럼 **초록 체크 + "수료" 글자**. 색만으로 상태를 전하지 않는다
+- 내비게이션과 컨트롤은 표준 그대로, 첫 화면은 표준 SaaS 구성(제목 → 제품 화면 → 기능 → 도입 절차)
 - 한글 조판 규칙(제목 행간 1.3~1.4, 본문 1.7~1.8, 음수 자간 금지, 어절 단위 줄바꿈)
 
 | 문서 | 내용 |

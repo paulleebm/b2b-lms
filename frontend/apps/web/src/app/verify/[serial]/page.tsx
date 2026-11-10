@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import type { CertificateVerification } from "@lms/api-client";
-import { Panel, SealMark } from "@lms/ui";
+import { CompletionMark, Panel } from "@lms/ui";
 
 import { koreanDate } from "@/lib/learning";
 import { getEnv } from "@/server/env";
@@ -41,7 +41,7 @@ export default async function VerifyPage({ params }: { params: Promise<{ serial:
           </div>
         ) : result ? (
           <div className="flex flex-col items-center gap-5 p-8 text-center">
-            <SealMark size="lg" completedAt={koreanDate(result.issuedAt)} />
+            <CompletionMark size="lg" completedAt={koreanDate(result.issuedAt)} />
             <div className="grid gap-1">
               <h1 className="text-title font-semibold text-ink">정상 발급된 수료증입니다</h1>
               <p className="text-body-sm text-muted tabular">수료번호 {result.serial}</p>
