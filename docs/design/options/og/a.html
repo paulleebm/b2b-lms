@@ -1,0 +1,24 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<title>og</title>
+<!-- LMS 토큰과 서체를 그대로 불러온다 (경로는 저장소 루트 기준) -->
+<link rel="stylesheet" href="/frontend/packages/ui/src/styles.css">
+<link rel="stylesheet" href="/frontend/packages/ui/node_modules/pretendard/dist/web/variable/pretendardvariable-dynamic-subset.css">
+<style>
+  /* A. 종이 바탕, 로고와 이름을 가운데 가로로 */
+  html, body { margin: 0; }
+  body { width: 1200px; height: 630px; overflow: hidden; position: relative;
+         background: var(--paper); color: var(--ink); font-family: "Pretendard Variable", sans-serif; word-break: keep-all; }
+  .lockup { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); display: flex; align-items: center; gap: 44px; }
+  .lockup svg { width: 184px; height: 184px; display: block; flex: none; }
+  .name { font-size: 164px; font-weight: 700; line-height: 1; }
+  .rule { position: absolute; left: 0; right: 0; bottom: 0; height: 16px; background: var(--shell); }
+</style>
+</head>
+<body>
+  <div class="lockup"><svg viewBox="0 0 32 32" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#1D2738"/><path d="M11 8v14.5h4.5L24 12" fill="none" stroke="#FFFFFF" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg><span class="name">LMS</span></div>
+  <div class="rule"></div>
+</body>
+</html>

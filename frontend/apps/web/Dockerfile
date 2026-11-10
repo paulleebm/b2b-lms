@@ -29,6 +29,8 @@ WORKDIR /app
 ENV NODE_ENV=production NEXT_TELEMETRY_DISABLED=1 PORT=3000 HOSTNAME=0.0.0.0
 COPY --from=build --chown=app:app /repo/apps/web/.next/standalone ./
 COPY --from=build --chown=app:app /repo/apps/web/.next/static ./apps/web/.next/static
+# public/ (favicon.ico, home-screen icons for the manifest) is not part of the standalone output either.
+COPY --from=build --chown=app:app /repo/apps/web/public ./apps/web/public
 USER app
 EXPOSE 3000
 CMD ["node", "apps/web/server.js"]

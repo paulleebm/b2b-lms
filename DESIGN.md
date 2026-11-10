@@ -181,7 +181,7 @@
 ### 로고 (BrandMark)
 - **L자의 발이 그대로 체크로 꺾이는 한 획**(2026-11-10, 사용자 선택). 제품 이름(LMS)과 "수료"를 한 기호에 담는다. 처음 넣은 lucide `BookOpen`은 너무 흔해서 바꿨다
 - 둥근 사각형(radius 8/32) 안에 3/32 굵기 선, 옆에 제품 이름. 밝은 바탕은 먹남 사각형·흰 선, 셸 위는 밝은 사각형·먹남 선
-- 같은 그림이 파비콘(`apps/web/src/app/icon.svg`)이다. 16px에서도 알아볼 수 있는지 확인했다
+- 같은 그림이 파비콘(`apps/web/src/app/icon.svg`)이다. 16px에서도 알아볼 수 있는지 확인했다. 어두운 브라우저 탭에서는 셸 위 규칙처럼 밝은 사각형·먹남 선으로 바뀐다(SVG 안 `prefers-color-scheme`, 2026-11-10 사용자 결정). 배포 그림 전체는 §11
 - 글자(한자·한글) 로고를 쓰지 않는다. 작은 크기에서 뭉개지고 뜻을 설명해야 한다
 
 ### Progress
@@ -330,6 +330,37 @@ success #1F7A4A (수료 포함) · warning #8A5300 · danger #AE1F3E · info #2F
 2. 새 컴포넌트는 `@lms/ui`에 먼저 만들고 Storybook에 다섯 상태 스토리를 쓴다
 3. 화면에 조립한다
 4. [docs/design/REVIEW.md](docs/design/REVIEW.md)로 검토한다
+
+---
+
+## 11. 배포 그림 (파비콘·홈 화면 아이콘·링크 미리보기)
+
+2026-11-10 사용자 결정. 테마(먹남 셸, 종이, 로고)로 만들고, 원본과 다시 만드는 명령을 여기에 둔다.
+
+| 파일 | 원본 | 바탕 | 비고 |
+|---|---|---|---|
+| `apps/web/src/app/icon.svg` | 이 파일이 원본(BrandMark와 같은 그림) | 먹남 사각형 | 어두운 탭에서는 밝은 사각형·먹남 선 |
+| `apps/web/public/favicon.ico` (16·32·48) | `icon.svg` | 투명 | `app/`에 두면 Next가 `sizes="any"`를 붙여 Chrome이 SVG 대신 ICO를 고를 수 있어서 `public/`에 둔다 |
+| `apps/web/src/app/apple-icon.png` (180) | `icon.svg` | `--shell` 꽉 채움 | iPhone 홈 화면. 로고 규칙(밝은 바탕 = 먹남 사각형·흰 선)대로 |
+| `apps/web/public/icon-192.png`, `icon-512.png`, `icon-mask.png` | `icon.svg` | 투명, `--shell` | 안드로이드 홈 화면. `app/manifest.webmanifest`가 가리킨다 |
+| `apps/web/src/app/opengraph-image.png` (1200×630) | [docs/design/brand/og.html](docs/design/brand/og.html) | `--shell` | 링크 미리보기. 시안 B(먹남 바탕, 로고 위·이름 아래)를 골랐다. 버린 안: A 종이 바탕(흰 대화창 위에서 덜 보인다), C 사이드바 띠(정사각 썸네일에서 로고가 잘린다). 시안: `docs/design/options/og/` |
+
+- 그림 속 글: `LMS`만 넣는다. 카카오톡은 그림 아래에 제목을 따로 보여 준다. 그림 설명(`opengraph-image.alt.txt`): "LMS 로고"
+- 설명 문장: `layout.tsx`의 description을 og·twitter에도 그대로 쓴다
+- theme-color: `--paper` `#F7F7F4`. 첫 화면 머리와 이어진다
+- `metadataBase`: 서버의 `APP_URL`. 빌드 중에 미리 만드는 페이지만 `https://app.bymile.site`를 쓴다
+- og:url은 넣지 않는다. 루트에 두면 모든 페이지가 첫 화면 주소를 물려받는다
+- Docker(standalone)는 `public/`을 복사하지 않아서 `apps/web/Dockerfile`에 복사 줄을 넣었다
+- 다시 만들기(저장소 루트에서, my-kit 저장소의 my-design 스크립트):
+  ```bash
+  node <my-kit>/skills/my-design/scripts/make-site-images.mjs build --next frontend/apps/web/src/app --out frontend/apps/web/public \
+    --icon frontend/apps/web/src/app/icon.svg --og docs/design/brand/og.html \
+    --name LMS --title "LMS — 기업 교육 플랫폼" --description "회사 단위로 직원 교육을 배정하고, 학습 진도와 수료를 관리하는 B2B 교육 플랫폼" \
+    --image-alt "LMS 로고" --tokens frontend/packages/ui/src/styles.css \
+    --theme-color "var(--paper)" --background-color "var(--paper)" --icon-bg "var(--shell)" \
+    --site-url https://app.bymile.site --url-env APP_URL --force
+  ```
+- 점검: `next build` 뒤 서버를 띄우고 `node <my-kit>/skills/my-design/scripts/check-site-images.mjs http://localhost:3000/ --site-url https://app.bymile.site`. 배포한 뒤에는 `https://app.bymile.site/`로 한 번 더 본다
 
 ---
 
