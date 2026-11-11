@@ -2,6 +2,9 @@ package com.lms.tenancy.internal;
 
 import com.lms.shared.TenantContext;
 import com.lms.shared.UuidV7;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.UncheckedIOException;
 import java.security.SecureRandom;
 import java.sql.Timestamp;
 import java.time.Instant;
@@ -17,12 +20,16 @@ import org.slf4j.LoggerFactory;
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
 import org.springframework.boot.SpringApplication;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.ApplicationContext;
 import org.springframework.jdbc.core.simple.JdbcClient;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.support.TransactionTemplate;
+import software.amazon.awssdk.core.sync.RequestBody;
+import software.amazon.awssdk.services.s3.S3Client;
+import software.amazon.awssdk.services.s3.model.PutObjectRequest;
 
 /**
  * Demo data for the interview (local only): {@code ./gradlew bootRun --args='--lms.seed=true --server.port=0'}.
@@ -35,6 +42,9 @@ import org.springframework.transaction.support.TransactionTemplate;
  * </ul>
  * Keycloak accounts get a known dev password (README). Data goes in with plain SQL inside each
  * company's tenant context, so RLS applies to the seeder too. Re-running skips existing companies.
+ * Each course opens with a video lesson: a slide-style mp4 from {@code resources/demo-videos}
+ * (made by {@code backend/scripts/make-demo-videos.py}), put in object storage the way a finished
+ * upload would be, already READY (the files module depends on tenancy, so no call the other way).
  */
 @Component
 @ConditionalOnProperty(name = "lms.seed", havingValue = "true")
@@ -42,6 +52,8 @@ class DemoSeeder implements ApplicationRunner {
 
     // Easy to type in a demo; the realm policy (10+ characters) still holds for real accounts.
     static final String PASSWORD = "1234567890";
+    /** Length of every demo video (make-demo-videos.py DURATION). */
+    static final int VIDEO_SECONDS = 30;
     private static final Logger log = LoggerFactory.getLogger(DemoSeeder.class);
     private static final SecureRandom RANDOM = new SecureRandom();
     private static final char[] CROCKFORD = "0123456789ABCDEFGHJKMNPQRSTVWXYZ".toCharArray();
@@ -50,12 +62,17 @@ class DemoSeeder implements ApplicationRunner {
     private final JdbcClient jdbc;
     private final TransactionTemplate tx;
     private final ApplicationContext context;
+    private final S3Client s3;
+    private final String bucket;
 
-    DemoSeeder(KeycloakAdminClient keycloak, JdbcClient jdbc, PlatformTransactionManager txManager, ApplicationContext context) {
+    DemoSeeder(KeycloakAdminClient keycloak, JdbcClient jdbc, PlatformTransactionManager txManager, ApplicationContext context,
+               S3Client s3, @Value("${lms.storage.bucket}") String bucket) {
         this.keycloak = keycloak;
         this.jdbc = jdbc;
         this.tx = new TransactionTemplate(txManager);
         this.context = context;
+        this.s3 = s3;
+        this.bucket = bucket;
     }
 
     record Person(String last, String first, String local, String role, String department) {
@@ -149,13 +166,13 @@ class DemoSeeder implements ApplicationRunner {
 
             List<Course> courses = full ? List.of(
                     course(tenantId, owner, "정보보안 기초", "피싱 메일과 비밀번호, 사내 자료를 다루는 기본 원칙을 20분 안에 익힙니다.",
-                            List.of("피싱 메일 알아보기", "안전한 비밀번호", "사내 자료 반출 규칙"), true),
+                            "phishing.mp4", List.of("피싱 메일 알아보기", "안전한 비밀번호", "사내 자료 반출 규칙"), true),
                     course(tenantId, owner, "직장 내 괴롭힘 예방", "법이 정한 괴롭힘의 기준과 신고 절차를 알아봅니다.",
-                            List.of("괴롭힘의 정의", "신고와 보호 절차"), false),
+                            "harassment.mp4", List.of("괴롭힘의 정의", "신고와 보호 절차"), false),
                     course(tenantId, owner, "개인정보보호 교육", "고객 정보를 다룰 때 지켜야 할 수집·이용·파기 원칙.",
-                            List.of("개인정보란 무엇인가", "수집과 파기"), true))
+                            "privacy.mp4", List.of("개인정보란 무엇인가", "수집과 파기"), true))
                     : List.of(course(tenantId, owner, "물류 현장 안전", "지게차와 적재 구역 안전 수칙.",
-                            List.of("적재 구역 수칙", "지게차 신호"), false));
+                            "loading-zone.mp4", List.of("적재 구역 수칙", "지게차 신호"), false));
 
             // Assignments: who takes what, by when (one overdue on purpose for the dashboard).
             Instant soon = now.plus(4, ChronoUnit.DAYS);
@@ -201,8 +218,9 @@ class DemoSeeder implements ApplicationRunner {
     record Course(UUID id, List<UUID> lessons, boolean quiz) {
     }
 
-    private Course course(UUID tenantId, UUID owner, String title, String description, List<String> lessonTitles,
-                          boolean withQuiz) {
+    /** @param video file in resources/demo-videos for the first lesson; the rest are text lessons */
+    private Course course(UUID tenantId, UUID owner, String title, String description, String video,
+                          List<String> lessonTitles, boolean withQuiz) {
         UUID courseId = UuidV7.generate();
         Instant published = Instant.now().minus(14, ChronoUnit.DAYS);
         jdbc.sql("""
@@ -217,6 +235,16 @@ class DemoSeeder implements ApplicationRunner {
         List<UUID> lessons = new ArrayList<>();
         for (int p = 0; p < lessonTitles.size(); p++) {
             UUID lesson = UuidV7.generate();
+            if (p == 0) {
+                jdbc.sql("""
+                                insert into lesson (id, tenant_id, course_id, section_id, title, type, position, video_asset_id)
+                                values (?, ?, ?, ?, ?, 'VIDEO', 0, ?)
+                                """)
+                        .params(lesson, tenantId, courseId, section, lessonTitles.get(p), readyVideo(tenantId, owner, video))
+                        .update();
+                lessons.add(lesson);
+                continue;
+            }
             jdbc.sql("""
                             insert into lesson (id, tenant_id, course_id, section_id, title, type, position, body)
                             values (?, ?, ?, ?, ?, 'TEXT', ?, ?)
@@ -246,6 +274,40 @@ class DemoSeeder implements ApplicationRunner {
         return new Course(courseId, lessons, withQuiz);
     }
 
+    /** Object + stored_file (UPLOADED) + video_asset (READY, rendition = the mp4, as the fake transcoder does). */
+    private UUID readyVideo(UUID tenantId, UUID uploadedBy, String resource) {
+        byte[] mp4;
+        try (InputStream in = DemoSeeder.class.getResourceAsStream("/demo-videos/" + resource)) {
+            if (in == null) {
+                throw new IllegalStateException("Missing demo video " + resource);
+            }
+            mp4 = in.readAllBytes();
+        } catch (IOException e) {
+            throw new UncheckedIOException(e);
+        }
+        UUID fileId = UuidV7.generate();
+        String key = "tenants/" + tenantId + "/files/" + fileId + "/source";   // StoredFile's key format
+        s3.putObject(PutObjectRequest.builder().bucket(bucket).key(key).contentType("video/mp4").build(),
+                RequestBody.fromBytes(mp4));
+        Instant now = Instant.now();
+        jdbc.sql("""
+                        insert into stored_file (id, tenant_id, purpose, object_key, file_name, content_type, size_bytes,
+                                                 status, uploaded_by, created_at, uploaded_at)
+                        values (?, ?, 'VIDEO_SOURCE', ?, ?, 'video/mp4', ?, 'UPLOADED', ?, ?, ?)
+                        """)
+                .params(fileId, tenantId, key, resource, mp4.length, uploadedBy, ts(now), ts(now))
+                .update();
+        UUID videoId = UuidV7.generate();
+        jdbc.sql("""
+                        insert into video_asset (id, tenant_id, source_file_id, status, hls_manifest_key, duration_seconds,
+                                                 created_at, ready_at)
+                        values (?, ?, ?, 'READY', ?, ?, ?, ?)
+                        """)
+                .params(videoId, tenantId, fileId, key, VIDEO_SECONDS, ts(now), ts(now))
+                .update();
+        return videoId;
+    }
+
     private void enroll(UUID tenantId, UUID membership, Course c, Instant due, String stage, Instant now) {
         UUID enrollment = UuidV7.generate();
         Instant started = stage.equals("NOT_STARTED") ? null : now.minus(5, ChronoUnit.DAYS);
@@ -263,11 +325,13 @@ class DemoSeeder implements ApplicationRunner {
             default -> 0;
         };
         for (int l = 0; l < done; l++) {
+            int watched = l == 0 ? VIDEO_SECONDS : 0;   // lesson 0 is the video: watched to the end
             jdbc.sql("""
-                            insert into lesson_progress (id, tenant_id, enrollment_id, lesson_id, completed_at)
-                            values (?, ?, ?, ?, ?)
+                            insert into lesson_progress (id, tenant_id, enrollment_id, lesson_id, watched_sec, last_position_sec, completed_at)
+                            values (?, ?, ?, ?, ?, ?, ?)
                             """)
-                    .params(UuidV7.generate(), tenantId, enrollment, c.lessons().get(l), ts(now.minus(4, ChronoUnit.DAYS)))
+                    .params(UuidV7.generate(), tenantId, enrollment, c.lessons().get(l), watched, watched,
+                            ts(now.minus(4, ChronoUnit.DAYS)))
                     .update();
         }
         if (completed != null) {
