@@ -4,7 +4,7 @@
 > 면접에서는 정상 흐름보다 **"이상 상황에서 어떻게 되나요?"** 를 더 많이 묻는다.
 
 목차
-1. 로그인 (BFF + Keycloak, 이메일 우선)
+1. 로그인 (BFF + Keycloak)
 2. 회사 등록
 3. 직원 초대와 첫 로그인
 4. 세션 유지, 토큰 갱신, 로그아웃
@@ -20,7 +20,7 @@
 
 ---
 
-## 1. 로그인 (BFF + Keycloak, 이메일 우선)
+## 1. 로그인 (BFF + Keycloak)
 
 ```mermaid
 sequenceDiagram
@@ -38,16 +38,12 @@ sequenceDiagram
     W->>W: state, nonce, PKCE code_verifier 생성
     W->>R: 로그인 임시 저장 (5분)
     W-->>U: 302 auth.도메인/realms/lms/...authorize<br/>?code_challenge=...&scope=openid organization
-    U->>KC: 이메일 입력 (이메일 우선 로그인)
-    alt 이메일 도메인이 SSO 연결된 회사
+    alt 일반 계정
+        U->>KC: 이메일 + 비밀번호 (한 화면, OTP를 설정했으면 그다음)
+    else 회사 SSO (로그인 화면의 IdP 버튼)
         KC-->>U: 302 고객사 IdP
         U->>IDP: 회사 계정으로 로그인
         IDP-->>KC: SAML/OIDC 응답
-    else 일반 계정
-        U->>KC: 비밀번호 (+ 관리자는 OTP)
-    end
-    opt 여러 조직에 소속
-        KC-->>U: 조직 선택 화면
     end
     KC-->>U: 302 app.도메인/auth/callback?code=...&state=...
     U->>W: GET /auth/callback
@@ -62,6 +58,8 @@ sequenceDiagram
     API->>API: 처음 보는 sub면 app_user 생성 (JIT)<br/>INVITED 멤버십이 있으면 활성화
     API-->>W: 내 정보, 역할
 ```
+
+**여러 회사에 속한 사람:** Keycloak은 회사 선택 화면을 이메일 우선 로그인에서만 보여주는데, 우리 로그인은 한 화면이라([01](01-product.md) §3) 토큰에 회사가 없이 돌아온다. `/app`은 `/onboarding`으로 보내고, 거기서 활성 멤버십이 하나면 `organization:<별칭>`으로 바로 다시 로그인하고(`?retried=1`로 한 번만), 여럿이면 "소속 회사" 목록에서 고르게 한다.
 
 **각 장치가 막는 공격**
 | 장치 | 막는 것 |
@@ -348,7 +346,7 @@ sequenceDiagram
 **설명**
 - **`ON CONFLICT`로 중복을 DB에 맡긴다.** "이미 있나 조회 → 없으면 INSERT"는 동시 요청에서 둘 다 "없음"으로 판단해 깨진다.
 - **메일 발송은 트랜잭션 밖에서**, 그러나 **유실 없이** 일어난다. 이벤트가 아웃박스에 커밋과 함께 저장되기 때문이다. 롤백되면 이벤트도 사라지므로 "배정은 실패했는데 메일만 감"도 없다.
-- **멱등 키:** 관리자가 버튼을 두 번 누르거나 네트워크 재전송이 일어나도, 같은 `Idempotency-Key`면 처음 결과를 그대로 돌려준다(Redis에 24시간 보관).
+- **멱등 키:** 관리자가 버튼을 두 번 누르거나 네트워크 재전송이 일어나도, 같은 `Idempotency-Key`면 처음 결과를 그대로 돌려준다. 키와 응답은 **배정과 같은 트랜잭션으로 DB 테이블**(`idempotency_record`)에 저장한다(처음 설계는 Redis 24시간 보관이었지만, 별도 저장소면 "배정은 됐는데 키는 못 남김"이 생길 수 있어 바꿨다).
 
 **규모가 커지면?** 직원 1만 명 회사에 전사 배정을 하면 한 트랜잭션에 1만 행이 들어간다. 그때는 assignment만 동기로 만들고, enrollment 생성은 **SQS 작업으로 500명씩 나눠** 처리한다.
 

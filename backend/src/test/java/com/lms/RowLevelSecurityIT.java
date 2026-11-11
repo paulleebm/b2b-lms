@@ -29,13 +29,30 @@ class RowLevelSecurityIT extends IntegrationTest {
 
     UUID tenantA;
     UUID tenantB;
+    UUID departmentB;
 
     @BeforeEach
     void seed() {
         tenantA = insertTenant();
         tenantB = insertTenant();
         TenantContext.runAs(tenantA, () -> tx.executeWithoutResult(s -> insertDepartment(tenantA, "A-개발")));
-        TenantContext.runAs(tenantB, () -> tx.executeWithoutResult(s -> insertDepartment(tenantB, "B-개발")));
+        departmentB = TenantContext.callAs(tenantB, () -> tx.execute(s -> insertDepartment(tenantB, "B-개발")));
+    }
+
+    @Test
+    @DisplayName("외래키 검사는 RLS를 우회하므로, (tenant_id, id) 복합 외래키가 다른 회사 부서 참조를 막는다")
+    void foreignKeyCannotPointIntoAnotherTenant() {
+        UUID userId = UuidV7.generate();
+        jdbc.sql("insert into app_user (id, keycloak_sub, email) values (?, ?, ?)")
+                .params(userId, "sub-" + userId, userId + "@example.com").update();
+
+        // B's department id is guessed or leaked; A's session cannot even see it, but a plain
+        // FK on department(id) would still accept it. The composite key does not.
+        assertThatThrownBy(() -> TenantContext.runAs(tenantA, () -> tx.executeWithoutResult(s ->
+                jdbc.sql("insert into membership (id, tenant_id, user_id, role, status, department_id) values (?, ?, ?, 'LEARNER', 'ACTIVE', ?)")
+                        .params(UuidV7.generate(), tenantA, userId, departmentB).update())))
+                .rootCause()
+                .hasMessageContaining("membership_department_fk");
     }
 
     @Test
@@ -80,8 +97,10 @@ class RowLevelSecurityIT extends IntegrationTest {
         return id;
     }
 
-    private void insertDepartment(UUID tenantId, String name) {
+    private UUID insertDepartment(UUID tenantId, String name) {
+        UUID id = UuidV7.generate();
         jdbc.sql("insert into department (id, tenant_id, name) values (?, ?, ?)")
-                .params(UuidV7.generate(), tenantId, name).update();
+                .params(id, tenantId, name).update();
+        return id;
     }
 }

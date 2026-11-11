@@ -1,9 +1,8 @@
 import * as React from "react";
 import { cva, type VariantProps } from "class-variance-authority";
-import { CircleDashed, CircleDot, Clock3, TriangleAlert, type LucideIcon } from "lucide-react";
+import { CircleCheck, CircleDashed, CircleDot, Clock3, TriangleAlert, type LucideIcon } from "lucide-react";
 
 import { cn } from "../lib/utils";
-import { SealMark } from "./seal-mark";
 
 /** Generic small chip (DESIGN.md §4 Badges). Always text; colour is a second channel. */
 const badgeVariants = cva(
@@ -16,7 +15,6 @@ const badgeVariants = cva(
         warning: "bg-warning-soft text-warning",
         danger: "bg-danger-soft text-danger",
         success: "bg-success-soft text-success",
-        seal: "bg-seal-soft text-seal-ink",
       },
     },
     defaultVariants: { tone: "neutral" },
@@ -40,37 +38,22 @@ type EnrollmentStatus =
   | { kind: "overdue" }
   | { kind: "completed"; completedAt?: string };
 
-const statusIcon: Record<Exclude<EnrollmentStatus["kind"], "completed">, LucideIcon> = {
+const statusIcon: Record<EnrollmentStatus["kind"], LucideIcon> = {
   "not-started": CircleDashed,
   "in-progress": CircleDot,
   "due-soon": Clock3,
   overdue: TriangleAlert,
+  completed: CircleCheck,
 };
 
-function StatusBadge({
-  status,
-  className,
-  withSeal = true,
-}: {
-  status: EnrollmentStatus;
-  className?: string;
-  /** Set false when a larger SealMark already sits on the same row: one seal per record. */
-  withSeal?: boolean;
-}) {
-  if (status.kind === "completed") {
-    return (
-      <Badge tone="seal" className={cn(withSeal && "pl-1", className)}>
-        {withSeal ? <SealMark size="sm" completedAt={status.completedAt} aria-hidden="true" role={undefined} /> : null}
-        수료
-      </Badge>
-    );
-  }
+function StatusBadge({ status, className }: { status: EnrollmentStatus; className?: string }) {
   const Icon = statusIcon[status.kind];
   const view = {
     "not-started": { tone: "neutral" as const, text: "미시작" },
     "in-progress": { tone: "info" as const, text: `진행 중 ${"percent" in status ? status.percent : 0}%` },
     "due-soon": { tone: "warning" as const, text: `마감 D-${"daysLeft" in status ? status.daysLeft : 0}` },
     overdue: { tone: "danger" as const, text: "마감 지남" },
+    completed: { tone: "success" as const, text: "수료" },
   }[status.kind];
 
   return (

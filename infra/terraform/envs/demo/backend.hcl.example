@@ -1,0 +1,6 @@
+# cp backend.hcl.example backend.hcl && terraform init -backend-config=backend.hcl
+bucket       = "lms-tfstate-123456789012" # output of bootstrap: state_bucket
+key          = "demo/terraform.tfstate"
+region       = "ap-northeast-2"
+encrypt      = true
+use_lockfile = true # S3-native lock file (Terraform >= 1.10), no DynamoDB table

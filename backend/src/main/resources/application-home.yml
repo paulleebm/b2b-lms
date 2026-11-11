@@ -1,0 +1,17 @@
+# Profile "home": the self-hosted deployment (infra/home). SPRING_PROFILES_ACTIVE=home.
+#
+# Tokens carry the public issuer (https://auth.bymile.site/realms/lms), but the signing keys are
+# fetched over the Docker network from the Keycloak container instead of going out through
+# the reverse proxy and back in. The issuer is still checked against issuer-uri.
+spring:
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          jwk-set-uri: ${KEYCLOAK_JWKS_URI}
+
+springdoc:
+  api-docs:
+    enabled: false   # production: no schema browsing (the API has no public name anyway)
+  swagger-ui:
+    enabled: false

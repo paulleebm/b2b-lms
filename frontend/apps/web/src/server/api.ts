@@ -52,6 +52,14 @@ const problemSchema = z
  * the Next.js server. `path` must be an absolute API path such as `/v1/me`.
  */
 export async function apiFetch<T>(path: string, init: RequestInit = {}): Promise<T> {
+  return (await apiFetchWithEtag<T>(path, init)).data;
+}
+
+/** Same as {@link apiFetch}, plus the response's ETag (course versions for If-Match). */
+export async function apiFetchWithEtag<T>(
+  path: string,
+  init: RequestInit = {},
+): Promise<{ data: T; etag: string | null }> {
   if (!path.startsWith("/") || path.startsWith("//")) {
     throw new Error(`apiFetch expects an absolute API path, got "${path}"`);
   }
@@ -76,10 +84,11 @@ export async function apiFetch<T>(path: string, init: RequestInit = {}): Promise
   if (!response.ok) {
     throw await toApiError(response);
   }
+  const etag = response.headers.get("ETag");
   if (response.status === 204 || response.headers.get("Content-Length") === "0") {
-    return undefined as T;
+    return { data: undefined as T, etag };
   }
-  return (await response.json()) as T;
+  return { data: (await response.json()) as T, etag };
 }
 
 async function toApiError(response: Response): Promise<ApiError> {

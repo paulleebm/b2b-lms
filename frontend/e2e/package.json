@@ -1,0 +1,15 @@
+{
+  "name": "@lms/e2e",
+  "version": "0.0.0",
+  "private": true,
+  "description": "End-to-end test against the running local stack (docker compose + API + web) with seeded demo data.",
+  "scripts": {
+    "test": "playwright test",
+    "screenshots": "playwright test --config playwright.screenshots.config.ts"
+  },
+  "devDependencies": {
+    "@playwright/test": "1.65.0",
+    "@types/node": "^22.20.5",
+    "typescript": "~6.0.3"
+  }
+}

@@ -1,0 +1,23 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<title>LMS 링크 미리보기 이미지</title>
+<!-- LMS 토큰과 서체를 그대로 불러온다 (경로는 저장소 루트 기준) -->
+<link rel="stylesheet" href="/frontend/packages/ui/src/styles.css">
+<link rel="stylesheet" href="/frontend/packages/ui/node_modules/pretendard/dist/web/variable/pretendardvariable-dynamic-subset.css">
+<style>
+  /* 링크 미리보기 이미지 1200×630 (2026-11-10 사용자 선택: 시안 B). 먹남 바탕(셸 = 브랜드) 위에 셸 위 로고(밝은 사각형·먹남 선)와 이름.
+     다시 만들기: DESIGN.md §11의 명령 */
+  html, body { margin: 0; }
+  body { width: 1200px; height: 630px; overflow: hidden; position: relative;
+         background: var(--shell); color: var(--shell-fg); font-family: "Pretendard Variable", sans-serif; word-break: keep-all; }
+  .lockup { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 36px; }
+  .lockup svg { width: 176px; height: 176px; display: block; flex: none; }
+  .name { font-size: 112px; font-weight: 700; line-height: 1; }
+</style>
+</head>
+<body>
+  <div class="lockup"><svg viewBox="0 0 32 32" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#E9ECF1"/><path d="M11 8v14.5h4.5L24 12" fill="none" stroke="#1D2738" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg><span class="name">LMS</span></div>
+</body>
+</html>

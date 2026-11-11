@@ -54,7 +54,7 @@ function Progress({
           style={{ width: `${percent}%` }}
         />
       </div>
-      {showValue ? <span className="w-14 shrink-0 text-right text-label text-ink-2 tabular">{text}</span> : null}
+      {showValue ? <span className="min-w-14 shrink-0 text-right text-label whitespace-nowrap text-ink-2 tabular">{text}</span> : null}
     </div>
   );
 }

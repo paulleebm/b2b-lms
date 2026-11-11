@@ -38,7 +38,7 @@ web (Next.js App Router, 데스크톱 우선 반응형)
 ## Brand Commitments
 
 - 제품명은 미정. 화면에는 "LMS"로 표기한다.
-- 디자인 방향: **인장과 이수증** (2026-11-06 확정). 세부는 [DESIGN.md](DESIGN.md).
+- 디자인 방향: **조용한 업무 도구** (2026-11-06 확정, 2026-11-10 인장 컨셉을 버리고 보편적인 디자인으로 변경). 세부는 [DESIGN.md](DESIGN.md).
 
 ## Evidence on Hand
 

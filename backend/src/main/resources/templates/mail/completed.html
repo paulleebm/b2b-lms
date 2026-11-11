@@ -1,0 +1,12 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="ko"
+      th:replace="~{mail/layout :: mail(title='수료를 축하합니다', content=~{::content})}">
+<body>
+<div th:fragment="content">
+  <p><span th:text="${name}">이름</span>님, <strong th:text="${courseTitle}">코스</strong> 과정을 수료했습니다.</p>
+  <p>수료번호 <strong th:text="${serial}">LMS-2026-XXXXXXXX</strong></p>
+  <p>수료증은 <a th:href="${appUrl + '/app'}" style="color:#2F5FA8;">내 교육</a>에서 내려받을 수 있고,
+    <a th:href="${appUrl + '/verify/' + serial}" style="color:#2F5FA8;">진위 확인 페이지</a>에서 누구나 확인할 수 있습니다.</p>
+</div>
+</body>
+</html>

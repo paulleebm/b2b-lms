@@ -1,0 +1,25 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<title>og</title>
+<!-- LMS 토큰과 서체를 그대로 불러온다 (경로는 저장소 루트 기준) -->
+<link rel="stylesheet" href="/frontend/packages/ui/src/styles.css">
+<link rel="stylesheet" href="/frontend/packages/ui/node_modules/pretendard/dist/web/variable/pretendardvariable-dynamic-subset.css">
+<style>
+  /* C. 앱 화면처럼 왼쪽 셸 띠에 로고, 종이 위에 이름 크게, 강조색 한 곳 */
+  html, body { margin: 0; }
+  body { width: 1200px; height: 630px; overflow: hidden; position: relative;
+         background: var(--paper); color: var(--ink); font-family: "Pretendard Variable", sans-serif; word-break: keep-all; }
+  .band { position: absolute; left: 0; top: 0; bottom: 0; width: 280px; background: var(--shell); }
+  .band svg { position: absolute; left: 80px; top: 80px; width: 120px; height: 120px; display: block; }
+  .main { position: absolute; left: 280px; right: 0; top: 0; bottom: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 28px; }
+  .name { font-size: 200px; font-weight: 700; line-height: 1; }
+  .accent { width: 120px; height: 12px; background: var(--accent); }
+</style>
+</head>
+<body>
+  <div class="band"><svg viewBox="0 0 32 32" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#E9ECF1"/><path d="M11 8v14.5h4.5L24 12" fill="none" stroke="#1D2738" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+  <div class="main"><span class="name">LMS</span><span class="accent"></span></div>
+</body>
+</html>

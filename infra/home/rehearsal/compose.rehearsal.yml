@@ -1,0 +1,12 @@
+# Rehearsal: run the exact home stack on this machine before pushing anything.
+#   IMAGE_PREFIX=local LOAD=1 PUBLIC_SCHEME=http DOMAIN=localhost ./infra/home/build-images.sh
+#   docker compose -p lms-rehearsal --env-file infra/home/rehearsal/rehearsal.env \
+#     -f infra/home/docker-compose.yml -f infra/home/rehearsal/compose.rehearsal.yml up -d
+#   → http://app.localhost (browsers resolve *.localhost to this machine by themselves)
+#
+# Differences from the real stack, and only these: HTTP and *.localhost names instead of HTTPS and
+# *.bymile.site (so no certificates), and caddy listens on this machine's loopback only.
+services:
+  caddy:
+    ports: !override
+      - "127.0.0.1:80:80"

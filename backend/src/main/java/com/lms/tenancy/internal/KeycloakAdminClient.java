@@ -67,12 +67,119 @@ public class KeycloakAdminClient {
                 .toBodilessEntity();
     }
 
+    /** Keycloak user id for this email; creates a password-less account if none exists. */
+    public KeycloakUser ensureUser(String email) {
+        List<?> found = http.get()
+                .uri(b -> b.path("/admin/realms/{realm}/users").queryParam("email", email).queryParam("exact", true)
+                        .build(props.realm()))
+                .headers(h -> h.setBearerAuth(accessToken()))
+                .retrieve()
+                .body(List.class);
+        if (found != null && !found.isEmpty() && found.getFirst() instanceof Map<?, ?> user) {
+            // An account we created earlier whose owner never set a password still needs the email.
+            boolean pending = user.get("requiredActions") instanceof List<?> actions && actions.contains("UPDATE_PASSWORD");
+            return new KeycloakUser(String.valueOf(user.get("id")), false, pending);
+        }
+        URI location = http.post()
+                .uri("/admin/realms/{realm}/users", props.realm())
+                .headers(h -> h.setBearerAuth(accessToken()))
+                .contentType(MediaType.APPLICATION_JSON)
+                .body(Map.of(
+                        "username", email,
+                        "email", email,
+                        "enabled", true,
+                        "emailVerified", false,
+                        "requiredActions", List.of("UPDATE_PASSWORD")))
+                .retrieve()
+                .toBodilessEntity()
+                .getHeaders()
+                .getLocation();
+        if (location == null) {
+            throw new IllegalStateException("Keycloak did not return the user location");
+        }
+        String path = location.getPath();
+        return new KeycloakUser(path.substring(path.lastIndexOf('/') + 1), true, true);
+    }
+
+    /** @param needsPasswordSetup no password yet: the invitation email is how they get one */
+    public record KeycloakUser(String id, boolean created, boolean needsPasswordSetup) {
+    }
+
+    /**
+     * Idempotent: already being a member is fine.
+     *
+     * @return true if this call added the membership (so a compensation may remove it again)
+     */
+    public boolean addMemberIfAbsent(String organizationId, String keycloakUserId) {
+        try {
+            addMember(organizationId, keycloakUserId);
+            return true;
+        } catch (HttpClientErrorException.Conflict alreadyMember) {
+            return false;
+        }
+    }
+
+    public void removeMember(String organizationId, String keycloakUserId) {
+        try {
+            http.delete()
+                    .uri("/admin/realms/{realm}/organizations/{id}/members/{userId}",
+                            props.realm(), organizationId, keycloakUserId)
+                    .headers(h -> h.setBearerAuth(accessToken()))
+                    .retrieve()
+                    .toBodilessEntity();
+        } catch (HttpClientErrorException.NotFound alreadyGone) {
+            // idempotent
+        }
+    }
+
+    /**
+     * Keycloak emails a link to set a password (dev: Mailpit, prod: SES). After setting it the
+     * person lands on {@code redirectUri} and signs in through the normal BFF flow.
+     */
+    public void sendSetupEmail(String keycloakUserId, String clientId, String redirectUri) {
+        http.put()
+                .uri(b -> b.path("/admin/realms/{realm}/users/{id}/execute-actions-email")
+                        .queryParam("client_id", clientId)
+                        .queryParam("redirect_uri", redirectUri)
+                        .queryParam("lifespan", 259200) // 72 hours, like the invitation policy
+                        .build(props.realm(), keycloakUserId))
+                .headers(h -> h.setBearerAuth(accessToken()))
+                .contentType(MediaType.APPLICATION_JSON)
+                .body(List.of("UPDATE_PASSWORD"))
+                .retrieve()
+                .toBodilessEntity();
+    }
+
     public void deleteOrganization(String organizationId) {
         http.delete()
                 .uri("/admin/realms/{realm}/organizations/{id}", props.realm(), organizationId)
                 .headers(h -> h.setBearerAuth(accessToken()))
                 .retrieve()
                 .toBodilessEntity();
+    }
+
+    /**
+     * Dev seeding only: a ready-to-use account with a known password (no email round trip).
+     * Real people get the set-password email instead ({@link #sendSetupEmail}).
+     */
+    public String provisionUser(String email, String firstName, String lastName, String password) {
+        String id = ensureUser(email).id();
+        http.put()
+                .uri("/admin/realms/{realm}/users/{id}", props.realm(), id)
+                .headers(h -> h.setBearerAuth(accessToken()))
+                .contentType(MediaType.APPLICATION_JSON)
+                .body(Map.of("firstName", firstName, "lastName", lastName, "emailVerified", true,
+                        "requiredActions", List.of()))
+                .retrieve()
+                .toBodilessEntity();
+        http.put()
+                .uri("/admin/realms/{realm}/users/{id}/reset-password", props.realm(), id)
+                .headers(h -> h.setBearerAuth(accessToken()))
+                .contentType(MediaType.APPLICATION_JSON)
+                .body(Map.of("type", "password", "value", password, "temporary", false))
+                .retrieve()
+                .toBodilessEntity();
+        return id;
     }
 
     private String accessToken() {

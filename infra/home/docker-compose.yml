@@ -1,0 +1,250 @@
+# The whole LMS on the mini PC: a Portainer stack (Stacks → Add stack → Web editor: paste this
+# file, then "Load variables from .env file" with the stack.env that gen-stack-env.sh wrote).
+# Images only: Portainer never builds anything here, and no file from the repo is mounted.
+#
+#   Internet ─▶ router (80/443 forwarded) ─▶ caddy ─┬▶ web (app.<domain>) ─▶ api ─▶ postgres · valkey · elasticmq
+#                                                    ├▶ keycloak (auth.<domain>)        worker ─▶ mailpit
+#                                                    ├▶ garage   (files.<domain>, S3 API)
+#                                                    └▶ mailpit  (inbox.<domain>, home network only)
+#
+# Only caddy publishes ports. The API, the databases and the queue have no way in from outside.
+# ${NAME:?…} makes the deploy fail when a variable is missing, instead of silently falling back to
+# the dev defaults baked into the images.
+
+name: lms
+
+x-public: &public
+  PUBLIC_SCHEME: ${PUBLIC_SCHEME:-https}
+  APP_HOST: ${APP_HOST:?set APP_HOST}
+  AUTH_HOST: ${AUTH_HOST:?set AUTH_HOST}
+  FILES_HOST: ${FILES_HOST:?set FILES_HOST}
+  INBOX_HOST: ${INBOX_HOST:?set INBOX_HOST}
+
+x-api-env: &api-env
+  SPRING_PROFILES_ACTIVE: home
+  JAVA_TOOL_OPTIONS: -XX:MaxRAMPercentage=75
+  DB_URL: jdbc:postgresql://postgres:5432/lms
+  DB_APP_PASSWORD: ${LMS_APP_PASSWORD:?set LMS_APP_PASSWORD}
+  DB_OWNER_PASSWORD: ${LMS_OWNER_PASSWORD:?set LMS_OWNER_PASSWORD}
+  REDIS_URL: redis://valkey:6379/0
+  # Tokens carry the public issuer; signing keys are fetched over the Docker network.
+  KEYCLOAK_ISSUER: ${PUBLIC_SCHEME:-https}://${AUTH_HOST}/realms/lms
+  KEYCLOAK_JWKS_URI: http://keycloak:8080/realms/lms/protocol/openid-connect/certs
+  KEYCLOAK_BASE_URL: http://keycloak:8080
+  KEYCLOAK_ADMIN_CLIENT_SECRET: ${LMS_ADMIN_CLIENT_SECRET:?set LMS_ADMIN_CLIENT_SECRET}
+  APP_URL: ${PUBLIC_SCHEME:-https}://${APP_HOST}
+  # Presigned URLs are signed for the host the API talks to, and browsers must reach that host,
+  # so the API uses the public name too; inside Docker it resolves to caddy (network alias below).
+  AWS_REGION: garage                     # Garage's s3_region; ElasticMQ ignores it
+  S3_ENDPOINT: ${PUBLIC_SCHEME:-https}://${FILES_HOST}
+  S3_BUCKET: lms-media
+  S3_ACCESS_KEY_ID: ${S3_ACCESS_KEY_ID:?set S3_ACCESS_KEY_ID}
+  S3_SECRET_ACCESS_KEY: ${S3_SECRET_ACCESS_KEY:?set S3_SECRET_ACCESS_KEY}
+  SQS_ENDPOINT: http://elasticmq:9324
+  MAIL_HOST: mailpit
+  MAIL_PORT: "1025"
+  MAIL_FROM: LMS <no-reply@${DOMAIN:?set DOMAIN}>
+
+services:
+  caddy:
+    image: ${IMAGE_PREFIX:?set IMAGE_PREFIX}/lms-caddy:${IMAGE_TAG:-latest}
+    restart: unless-stopped
+    environment: *public
+    ports:
+      - "80:80"
+      - "443:443"
+      - "443:443/udp"                    # HTTP/3
+    volumes:
+      - caddy_data:/data                 # certificates and the ACME account: keep across redeploys
+      - caddy_config:/config
+    networks:
+      default:
+        # Containers that call the public names (web → auth, api → files) reach caddy directly,
+        # with the same certificate the browser sees, instead of leaving through the router.
+        aliases:
+          - ${APP_HOST}
+          - ${AUTH_HOST}
+          - ${FILES_HOST}
+
+  postgres:
+    image: ${IMAGE_PREFIX}/lms-postgres:${IMAGE_TAG:-latest}
+    restart: unless-stopped
+    environment:
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?set POSTGRES_PASSWORD}
+      LMS_OWNER_PASSWORD: ${LMS_OWNER_PASSWORD}
+      LMS_APP_PASSWORD: ${LMS_APP_PASSWORD}
+      KEYCLOAK_DB_PASSWORD: ${KEYCLOAK_DB_PASSWORD:?set KEYCLOAK_DB_PASSWORD}
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d keycloak"]
+      interval: 5s
+      timeout: 3s
+      retries: 30
+
+  # Two uses, two logical databases: 0 = API cache, 1 = BFF sessions.
+  valkey:
+    image: valkey/valkey:8-alpine
+    restart: unless-stopped
+    command: ["valkey-server", "--save", "60", "1"]   # sessions survive a restart
+    volumes:
+      - valkeydata:/data
+    healthcheck:
+      test: ["CMD", "valkey-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+
+  elasticmq:
+    image: ${IMAGE_PREFIX}/lms-elasticmq:${IMAGE_TAG:-latest}
+    restart: unless-stopped
+
+  # S3-compatible object storage (videos, attachments, certificate PDFs).
+  garage:
+    image: ${IMAGE_PREFIX}/lms-garage:${IMAGE_TAG:-latest}
+    restart: unless-stopped
+    environment:
+      GARAGE_RPC_SECRET: ${GARAGE_RPC_SECRET:?set GARAGE_RPC_SECRET}
+      GARAGE_ADMIN_TOKEN: ${GARAGE_ADMIN_TOKEN:?set GARAGE_ADMIN_TOKEN}
+    volumes:
+      - garage_meta:/var/lib/garage/meta
+      - garage_data:/var/lib/garage/data
+
+  # One-off: layout, access key, bucket. Exits 0 when Garage is ready for the API.
+  storage-init:
+    image: ${IMAGE_PREFIX}/lms-storage-init:${IMAGE_TAG:-latest}
+    restart: "no"
+    environment:
+      GARAGE_ADMIN_TOKEN: ${GARAGE_ADMIN_TOKEN}
+      S3_ACCESS_KEY_ID: ${S3_ACCESS_KEY_ID}
+      S3_SECRET_ACCESS_KEY: ${S3_SECRET_ACCESS_KEY}
+      S3_BUCKET: lms-media
+      STORAGE_CAPACITY_GB: ${STORAGE_CAPACITY_GB:-100}
+    depends_on:
+      garage:
+        condition: service_started
+
+  # Outgoing mail stays here (no SMTP provider needed for a demo).
+  mailpit:
+    image: axllent/mailpit:v1.33.0
+    restart: unless-stopped
+    environment:
+      MP_DATABASE: /data/mailpit.db
+      MP_MAX_MESSAGES: "2000"
+    volumes:
+      - maildata:/data
+
+  keycloak:
+    image: ${IMAGE_PREFIX}/lms-keycloak:${IMAGE_TAG:-latest}
+    restart: unless-stopped
+    environment:
+      KC_DB_URL: jdbc:postgresql://postgres:5432/keycloak
+      KC_DB_USERNAME: keycloak
+      KC_DB_PASSWORD: ${KEYCLOAK_DB_PASSWORD}
+      # Browsers and the BFF see the public name; the API reaches the same Keycloak over the
+      # Docker network (backchannel), and tokens still carry the public issuer.
+      KC_HOSTNAME: ${PUBLIC_SCHEME:-https}://${AUTH_HOST}
+      KC_HOSTNAME_BACKCHANNEL_DYNAMIC: "true"
+      KC_HTTP_ENABLED: "true"            # TLS ends at caddy; plain HTTP inside
+      KC_PROXY_HEADERS: xforwarded
+      KC_BOOTSTRAP_ADMIN_USERNAME: admin
+      KC_BOOTSTRAP_ADMIN_PASSWORD: ${KEYCLOAK_ADMIN_PASSWORD:?set KEYCLOAK_ADMIN_PASSWORD}
+      # Placeholders in the realm file (used on the first import only)
+      LMS_APP_URL: ${PUBLIC_SCHEME:-https}://${APP_HOST}
+      LMS_WEB_CLIENT_SECRET: ${LMS_WEB_CLIENT_SECRET:?set LMS_WEB_CLIENT_SECRET}
+      LMS_ADMIN_CLIENT_SECRET: ${LMS_ADMIN_CLIENT_SECRET}
+      LMS_API_CLIENT_SECRET: ${LMS_API_CLIENT_SECRET:?set LMS_API_CLIENT_SECRET}
+      LMS_SMTP_HOST: mailpit
+      LMS_SMTP_PORT: "1025"
+      LMS_SMTP_FROM: no-reply@${DOMAIN}
+    healthcheck:
+      # The image has no curl/wget; bash's /dev/tcp asks the management port directly.
+      test: ["CMD-SHELL", "exec 3<>/dev/tcp/127.0.0.1/9000 && printf 'GET /health/ready HTTP/1.1\\r\\nHost: localhost\\r\\nConnection: close\\r\\n\\r\\n' >&3 && grep -q '\"UP\"' <&3"]
+      interval: 10s
+      timeout: 5s
+      retries: 30
+      start_period: 30s
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  # Serves HTTP requests; runs Flyway on start. Scheduled jobs are guarded by ShedLock.
+  api:
+    image: ${IMAGE_PREFIX}/lms-api:${IMAGE_TAG:-latest}
+    restart: unless-stopped
+    environment:
+      <<: *api-env
+      WORKER_ENABLED: "false"
+    mem_limit: 1g
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://127.0.0.1:8081/actuator/health/readiness | grep -q UP"]
+      interval: 10s
+      timeout: 5s
+      retries: 30
+      start_period: 40s
+    depends_on:
+      postgres:
+        condition: service_healthy
+      valkey:
+        condition: service_healthy
+      keycloak:
+        condition: service_healthy
+      elasticmq:
+        condition: service_started
+      storage-init:
+        condition: service_completed_successfully
+      caddy:
+        condition: service_started
+
+  # Same image: consumes the SQS queues (certificates, mail, transcoding). Starts after the API so
+  # only one of them applies migrations on a fresh database.
+  worker:
+    image: ${IMAGE_PREFIX}/lms-api:${IMAGE_TAG:-latest}
+    restart: unless-stopped
+    environment:
+      <<: *api-env
+      WORKER_ENABLED: "true"
+    mem_limit: 1g
+    depends_on:
+      api:
+        condition: service_healthy
+
+  # One-off: demo companies, people and courses. Idempotent (existing companies are skipped), so
+  # it runs on every redeploy and exits when done ("Exited (0)" in Portainer is the normal state).
+  seed:
+    image: ${IMAGE_PREFIX}/lms-api:${IMAGE_TAG:-latest}
+    restart: "no"
+    command: ["--lms.seed=true", "--server.port=0"]
+    environment:
+      <<: *api-env
+      WORKER_ENABLED: "false"
+    depends_on:
+      api:
+        condition: service_healthy
+
+  # Next.js BFF: the browser holds only a session cookie; tokens stay in Valkey.
+  web:
+    image: ${IMAGE_PREFIX}/lms-web:${IMAGE_TAG:-latest}
+    restart: unless-stopped
+    environment:
+      APP_URL: ${PUBLIC_SCHEME:-https}://${APP_HOST}
+      KEYCLOAK_ISSUER: ${PUBLIC_SCHEME:-https}://${AUTH_HOST}/realms/lms
+      KEYCLOAK_CLIENT_ID: lms-web
+      KEYCLOAK_CLIENT_SECRET: ${LMS_WEB_CLIENT_SECRET}
+      REDIS_URL: redis://valkey:6379/1
+      API_URL: http://api:8081
+    mem_limit: 512m
+    depends_on:
+      api:
+        condition: service_healthy
+      caddy:
+        condition: service_started
+
+volumes:
+  caddy_data:
+  caddy_config:
+  pgdata:
+  valkeydata:
+  garage_meta:
+  garage_data:
+  maildata:

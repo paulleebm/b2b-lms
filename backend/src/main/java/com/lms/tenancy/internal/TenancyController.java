@@ -1,5 +1,6 @@
 package com.lms.tenancy.internal;
 
+import com.lms.shared.web.ApiNullable;
 import com.lms.shared.TenantContext;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
@@ -55,7 +56,8 @@ class TenancyController {
     record TenantResponse(UUID id, String slug, String name) {
     }
 
-    record MeResponse(UUID userId, String email, String name, CurrentTenant currentTenant, String role,
+    record MeResponse(UUID userId, String email, @ApiNullable String name, @ApiNullable CurrentTenant currentTenant,
+                      @ApiNullable String role,
                       List<MembershipItem> memberships) {
     }
 

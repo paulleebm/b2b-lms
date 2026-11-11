@@ -2,6 +2,7 @@ import * as React from "react";
 import {
   Award,
   BookOpen,
+  BookOpenText,
   Building2,
   ChevronsUpDown,
   ClipboardList,
@@ -40,6 +41,16 @@ export const learnerNav: NavSection[] = [
     ],
   },
 ];
+
+/** Instructor studio: their own courses only (DESIGN.md §4 Navigation). */
+export const instructorNav: NavSection[] = [
+  { items: [{ href: "/app/studio", label: "내 코스", icon: BookOpenText, current: true }] },
+];
+
+/** Same navigation with a different current item, e.g. the members page. */
+export function withCurrent(sections: NavSection[], href: string): NavSection[] {
+  return sections.map((s) => ({ ...s, items: s.items.map((i) => ({ ...i, current: i.href === href })) }));
+}
 
 export function WorkspaceSwitcher({ name }: { name: string }) {
   return (

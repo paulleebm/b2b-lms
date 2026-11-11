@@ -1,0 +1,13 @@
+# cp demo.tfvars.example demo.tfvars  (demo.tfvars is gitignored)
+domain             = "bymile.site" # registered at Gabia; hosted zone created by bootstrap/
+alert_email        = "you@example.com"
+monthly_budget_usd = 100
+image_tag          = "bootstrap"
+
+# PKCS#8 private key (the API reads "BEGIN PRIVATE KEY"; old "openssl genrsa" writes PKCS#1):
+# openssl genpkey -algorithm RSA -pkeyopt rsa_keygen_bits:2048 -out cf-private.pem && openssl pkey -in cf-private.pem -pubout -out cf-public.pem
+cloudfront_public_key_pem = <<-EOT
+-----BEGIN PUBLIC KEY-----
+REPLACE-WITH-cf-public.pem
+-----END PUBLIC KEY-----
+EOT

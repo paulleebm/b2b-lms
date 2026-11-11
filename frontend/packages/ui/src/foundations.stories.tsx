@@ -1,6 +1,6 @@
 import type { Meta, StoryObj } from "@storybook/react-vite";
 
-import { SealMark } from "./components/seal-mark";
+import { CompletionMark } from "./components/completion-mark";
 
 /** Living view of DESIGN.md §2–§3. Values come from CSS variables, so this page cannot drift. */
 const meta = {
@@ -16,7 +16,6 @@ const groups: { title: string; note: string; tokens: string[] }[] = [
   { title: "글자", note: "본문 17:1, 보조 10:1, 설명 6:1 (흰 바탕).", tokens: ["ink", "ink-2", "muted"] },
   { title: "셸", note: "먹남 사이드바가 브랜드를 진다.", tokens: ["shell", "shell-fg", "shell-muted", "shell-active", "shell-ring"] },
   { title: "행동과 강조", note: "강조색은 화면당 2곳 이하. 기본 인디고 금지.", tokens: ["primary", "primary-hover", "accent", "accent-soft", "selection"] },
-  { title: "인장 (수료 전용)", note: "버튼·링크·오류에 쓰지 않는다.", tokens: ["seal", "seal-soft", "seal-ink"] },
   {
     title: "상태",
     note: "항상 아이콘 + 글자와 함께.",
@@ -95,18 +94,18 @@ export const Typography: Story = {
   ),
 };
 
-export const Seal: Story = {
-  name: "Signature — 수료 인장",
+export const Completion: Story = {
+  name: "수료 표시",
   render: () => (
     <div className="grid max-w-2xl gap-6">
       <p className="text-body-sm text-muted">
-        수료와 수료증 발급에만 쓴다. 인장이 보이면 언제나 "끝났고, 기록됐다"는 뜻이다. 20px에서는 한글 두 글자가
-        뭉개지므로 전통 인장 관습대로 한자 한 글자(修)를 쓰고, 옆에 항상 "수료" 글자를 둔다.
+        수료는 일반 성공색(초록) 체크로 표시한다. 표 행과 배지는 StatusBadge의 "수료" 칩, 코스 행과 수료 순간은
+        CompletionMark를 쓴다. 색만으로 구분하지 않도록 항상 "수료" 글자나 읽어 주는 이름이 함께 있다.
       </p>
       <div className="flex items-end gap-10">
-        {(["sm", "md", "lg"] as const).map((size) => (
+        {(["md", "lg"] as const).map((size) => (
           <div key={size} className="grid justify-items-center gap-2">
-            <SealMark size={size} completedAt="2026. 11. 6." />
+            <CompletionMark size={size} completedAt="2026. 11. 6." />
             <code className="font-mono text-caption text-muted">{size}</code>
           </div>
         ))}

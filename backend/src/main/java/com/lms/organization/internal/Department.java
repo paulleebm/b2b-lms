@@ -30,6 +30,10 @@ class Department extends AbstractEntity {
         this.createdAt = Instant.now();
     }
 
+    void rename(String name) {
+        this.name = name;
+    }
+
     String getName() {
         return name;
     }

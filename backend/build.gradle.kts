@@ -40,8 +40,29 @@ dependencies {
     // Redis (Valkey): membership cache, rate limits, BFF sessions live in the same cluster
     implementation("org.springframework.boot:spring-boot-starter-data-redis")
 
-    // Modular monolith boundaries (event publication registry / outbox is added on Day 4)
+    // Modular monolith boundaries
     implementation("org.springframework.modulith:spring-modulith-starter-core")
+
+    // AWS SDK v2. Locally: S3 → Adobe S3Mock, SQS → ElasticMQ (both API-compatible stand-ins).
+    implementation(platform("software.amazon.awssdk:bom:2.46.7"))
+    implementation("software.amazon.awssdk:s3")
+    implementation("software.amazon.awssdk:sqs")
+    implementation("software.amazon.awssdk:mediaconvert")
+    implementation("software.amazon.awssdk:cloudfront")   // signed cookies for HLS
+
+    // Outbox: Spring Modulith's event publication registry (events stored in the business transaction)
+    implementation("org.springframework.modulith:spring-modulith-starter-jdbc")
+
+    // Certificates and mail: HTML templates (Thymeleaf) → PDF (OpenHTMLtoPDF, LGPL; iText is AGPL)
+    implementation("org.springframework.boot:spring-boot-starter-thymeleaf")
+    implementation("org.springframework.boot:spring-boot-starter-mail")
+    implementation("io.github.openhtmltopdf:openhtmltopdf-pdfbox:1.1.108")
+
+    // Dashboard cache (Redis in the app, an in-memory cache in tests) and scheduled jobs that run
+    // on exactly one instance even when several are deployed (ShedLock, lock rows in PostgreSQL)
+    implementation("org.springframework.boot:spring-boot-starter-cache")
+    implementation("net.javacrumbs.shedlock:shedlock-spring:6.6.0")
+    implementation("net.javacrumbs.shedlock:shedlock-provider-jdbc-template:6.6.0")
 
     implementation("org.springframework.boot:spring-boot-starter-actuator")
 
@@ -69,4 +90,9 @@ tasks.withType<JavaCompile> {
 
 tasks.withType<Test> {
     useJUnitPlatform()
+    // One line per test with its @DisplayName (the scenario in Korean), full trace on failure.
+    testLogging {
+        events("passed", "skipped", "failed")
+        exceptionFormat = org.gradle.api.tasks.testing.logging.TestExceptionFormat.FULL
+    }
 }

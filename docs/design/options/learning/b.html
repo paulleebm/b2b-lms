@@ -1,0 +1,34 @@
+<!doctype html><html lang="ko"><head><meta charset="utf-8"><title>B. 목차 옆에</title>
+<link rel="stylesheet" href="base.css"><style>
+.cols{display:grid;grid-template-columns:1fr 300px;gap:24px;align-items:start;margin-top:18px}
+.outline .hd{padding:16px 18px 14px;border-bottom:1px solid var(--line)}
+.outline .hd b{font-size:15px}.outline .hd p{font-size:12px;color:var(--muted);margin:4px 0 10px}
+.ol{list-style:none}
+.ol li{display:flex;align-items:center;gap:10px;padding:11px 18px;font-size:14px;color:var(--ink-2);border-left:3px solid transparent}
+.ol li+li{border-top:1px solid var(--line)}
+.ol li.now{background:var(--accent-soft);border-left-color:var(--accent);color:var(--ink);font-weight:600}
+.ol li .k{margin-left:auto;font-size:12px;color:var(--muted);font-weight:500}
+.cl li{padding:16px 20px;font-size:15px}
+.cl li.now{display:grid;grid-template-columns:auto 1fr auto;row-gap:2px}
+.cl li.now small{grid-column:2;font-size:13px;color:var(--muted);font-weight:500}
+.cl li.now .btn{grid-row:1/3;grid-column:3}
+.tog{display:flex;align-items:center;gap:10px;padding:12px 14px;font-size:14px}
+.tog b{flex:1}
+</style></head><body>
+<div class="note"><h1>B. 목차 옆에</h1><p>레슨 화면 오른쪽에 코스 목차를 늘 둡니다(온라인 강의 사이트에서 익숙한 배치). 지금 단계는 강조색 줄로, 끝낸 단계는 체크로 보입니다. 코스 화면은 같은 목록 하나에 '지금 단계' 줄만 펼쳐 버튼을 붙였습니다. 단계가 많아도 무너지지 않지만, 레슨 화면 본문 폭이 좁아집니다. 휴대폰은 목차를 '2/4 · 제목' 한 줄로 접고 누르면 펼칩니다.</p></div>
+<p class="label">코스 화면</p><div class="desk"><aside class="shell"><div class="brand"><svg viewBox="0 0 32 32"><rect width="32" height="32" rx="8" fill="#E9ECF1"/><path d="M11 8v14.5h4.5L24 12" fill="none" stroke="#1D2738" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>LMS</div><div class="navi">내 교육</div></aside><div><div class="top">데모전자<span>박서연 · 학습자</span></div><main class="work"><p class="back"><svg class="i" viewBox="0 0 24 24"><path d="M15 6l-6 6 6 6"/></svg>내 교육</p><h2 class="h1">정보보안 기초</h2>
+<p class="meta" style="margin-top:6px">마감 11월 14일</p>
+<div class="panel" style="margin-top:20px"><div style="padding:16px 20px;border-bottom:1px solid var(--line);display:flex;align-items:center;gap:14px">
+<span class="meta" style="white-space:nowrap">1/4 단계</span><div class="bar" style="flex:1"><i style="width:25%"></i></div></div>
+<ul class="ol cl"><li class="done"><span class="dot done"><svg viewBox="0 0 24 24"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></span><span>피싱 메일 알아보기</span><span class="k">영상</span></li><li class="now"><span class="dot now">2</span><span>안전한 비밀번호</span><small>2단계 · 텍스트</small><span class="btn pri"><svg class="i" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M10 8.5v7l5.5-3.5z"/></svg>이어서 학습하기</span></li><li class="todo"><span class="dot todo">3</span><span>사내 자료 반출 규칙</span><span class="k">텍스트</span></li><li class="lock"><span class="dot lock"><svg viewBox="0 0 24 24"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg></span><span>최종 퀴즈</span><span class="k">퀴즈</span></li></ul></div></main></div></div>
+<p class="label">레슨 화면 (데스크톱 1280 · 휴대폰 360)</p>
+<div class="row"><div class="desk"><aside class="shell"><div class="brand"><svg viewBox="0 0 32 32"><rect width="32" height="32" rx="8" fill="#E9ECF1"/><path d="M11 8v14.5h4.5L24 12" fill="none" stroke="#1D2738" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>LMS</div><div class="navi">내 교육</div></aside><div><div class="top">데모전자<span>박서연 · 학습자</span></div><main class="work"><p class="back"><svg class="i" viewBox="0 0 24 24"><path d="M15 6l-6 6 6 6"/></svg>정보보안 기초</p><h2 class="h1">안전한 비밀번호</h2>
+<div class="cols"><div class="panel" style="padding:24px"><div class="body"><p>안전한 비밀번호</p><p>이 레슨은 데모용 본문입니다. 업무에서 지켜야 할 원칙을 읽고 '다 읽었어요'를 누르세요.</p></div>
+<div style="display:flex;justify-content:flex-end;border-top:1px solid var(--line);margin-top:20px;padding-top:16px"><span class="btn pri">다 읽었어요</span></div></div>
+<aside class="panel outline"><div class="hd"><b>정보보안 기초</b><p>1/4 단계 · 마감 11월 14일</p><div class="bar"><i style="width:25%"></i></div></div><ul class="ol "><li class="done"><span class="dot done"><svg viewBox="0 0 24 24"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></span><span>피싱 메일 알아보기</span><span class="k">영상</span></li><li class="now"><span class="dot now">2</span><span>안전한 비밀번호</span><span class="k">텍스트</span></li><li class="todo"><span class="dot todo">3</span><span>사내 자료 반출 규칙</span><span class="k">텍스트</span></li><li class="lock"><span class="dot lock"><svg viewBox="0 0 24 24"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg></span><span>최종 퀴즈</span><span class="k">퀴즈</span></li></ul></aside></div></main></div></div></div>
+<div class="row" style="margin-top:24px"><div class="phone"><div class="top">데모전자<span>박서연</span></div><main class="work"><p class="back"><svg class="i" viewBox="0 0 24 24"><path d="M15 6l-6 6 6 6"/></svg>정보보안 기초</p>
+<div class="panel tog"><span class="dot now">2</span><b>2/4 · 안전한 비밀번호</b><svg class="i" viewBox="0 0 24 24"><path d="M6 9l6 6 6-6"/></svg></div>
+<h2 class="h1" style="font-size:22px;margin-top:16px">안전한 비밀번호</h2>
+<div class="panel" style="margin-top:14px;padding:18px"><div class="body"><p>안전한 비밀번호</p><p>이 레슨은 데모용 본문입니다. 업무에서 지켜야 할 원칙을 읽고 '다 읽었어요'를 누르세요.</p></div></div>
+<div style="display:grid;margin-top:16px"><span class="btn pri lg">다 읽었어요</span></div></main></div></div>
+</body></html>

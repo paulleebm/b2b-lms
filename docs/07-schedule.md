@@ -97,16 +97,16 @@
 > 목표: **돈 내는 사람(HR)이 보는 화면과, 비동기 처리의 표준 패턴을 완성한다.**
 
 **백엔드**
-- [ ] 대시보드: `JdbcClient` 집계 SQL, Redis 캐시(tenantId 키)
-- [ ] **아웃박스 → SQS → worker**: Modulith 이벤트 레지스트리, SQS 발행, worker 프로필, DLQ
-- [ ] 수료증: Thymeleaf + OpenHTMLtoPDF(한글 폰트), S3 저장, 다운로드, 공개 진위 확인
-- [ ] **영상 변환 (Should)**: MediaConvert 작업 템플릿(HLS 1080p·720p·480p, 썸네일) + 전용 IAM 역할을 Terraform으로, `VideoUploaded` → SQS → 워커 `CreateJob`, **EventBridge 규칙 → SQS → 완료·실패 처리**, 오래 걸리는 작업 점검 예약 작업
-- [ ] 메일(SES / 로컬 Mailpit): 배정 알림, 리마인더
-- [ ] 감사 로그(이벤트 구독), 예약 작업(`@Scheduled` + ShedLock)
+- [x] 대시보드: `JdbcClient` 집계 SQL, Redis 캐시(tenantId 키)
+- [x] **아웃박스 → SQS → worker**: Modulith 이벤트 레지스트리, SQS 발행, worker 프로필, DLQ
+- [x] 수료증: Thymeleaf + OpenHTMLtoPDF(한글 폰트), S3 저장, 다운로드, 공개 진위 확인
+- [x] **영상 변환 (Should)**: MediaConvert 작업 템플릿(HLS 1080p·720p·480p, 썸네일) + 전용 IAM 역할을 Terraform으로, `VideoUploaded` → SQS → 워커 `CreateJob`, **EventBridge 규칙 → SQS → 완료·실패 처리**, 오래 걸리는 작업 점검 예약 작업
+- [x] 메일(SES / 로컬 Mailpit): 배정 알림, 리마인더
+- [x] 감사 로그(이벤트 구독), 예약 작업(`@Scheduled` + ShedLock)
 
 **프론트**
-- [ ] 대시보드(KPI, 부서별 차트, 미이수자 표, 리마인더 버튼), 내 수료증, 진위 확인 페이지
-- [ ] **Storybook 보강**: 핵심 컴포넌트의 상태별 스토리, MSW, 인터랙션 테스트, **Chromatic 연결**
+- [x] 대시보드(KPI, 부서별 차트, 미이수자 표, 리마인더 버튼), 내 수료증, 진위 확인 페이지
+- [x] **Storybook 보강**: 상태별 스토리·인터랙션 테스트 (98개). MSW·Chromatic은 미룸 (화면 조립 컴포넌트가 props만 받아 목이 필요 없음, Chromatic은 CI 이후)
 
 **📝 면접 노트:** 아웃박스 패턴, 최소 한 번 전달과 멱등성, DLQ, 캐시 키 격리, iText 라이선스 이슈, 영상을 변환하는 이유(호환성·ABR·트래픽), 폴링 대신 이벤트, HLS에 서명 쿠키를 쓰는 이유
 
@@ -116,22 +116,22 @@
 > 목표: **면접관이 링크 하나로 모든 걸 확인할 수 있는 상태.**
 
 **DevOps**
-- [ ] CD 완성: main 머지 → Trivy → ECR → Flyway 태스크 → ECS 롤링 + 회로 차단기
-- [ ] **롤백 리허설**: 일부러 헬스체크가 실패하는 버전을 배포해 자동 롤백 확인
-- [ ] OpenTelemetry → Grafana Cloud, Sentry, CloudWatch 알람(5xx, DLQ, 예산)
-- [ ] CodeQL, Dependabot, SonarCloud 연결
-- [ ] 노트북 백업 시연 모드(`docker compose --profile full up`) 확인
+- [ ] CD 완성: main 머지 → Trivy → ECR → Flyway 태스크 → ECS 롤링 + 회로 차단기 — **미룸**(저장소 토큰 `workflow` 권한). OIDC 역할·회로 차단기·마이그레이션 태스크는 Terraform에 있음
+- [ ] **롤백 리허설** — 미룸 (AWS 적용 안 함)
+- [~] CloudWatch 알람(5xx, DLQ, 예산)과 JSON 로그(ECS 형식)는 코드에 있음. OpenTelemetry·Sentry는 미룸
+- [ ] CodeQL, Dependabot, SonarCloud 연결 — 미룸 (CI와 함께)
+- [x] 컨테이너만으로 도는 백엔드: 홈 배포 스택으로 해결 (Keycloak 백채널 + API의 JWKS 내부 주소). 이 PC에서 리허설 가능 — [infra/home](../infra/home/README.md)
 
 **데이터·문서**
-- [ ] 시드: 데모 회사 2개(교차 테넌트 시연), 계정 3종, 코스 3개, 다양한 진도의 직원 20명
-- [ ] README: 아키텍처 그림, 기술 선택 요약(→ docs), **비용 표**, 데모 계정, 로컬 실행법
-- [ ] `docs/09-interview-qa.md`: 예상 질문과 답
+- [x] 시드: 데모 회사 2개(교차 테넌트 시연), 계정 3종, 코스 3개, 다양한 진도의 직원 20명
+- [x] README: 아키텍처 그림, 기술 선택 요약(→ docs), **비용 표**, 데모 계정, 로컬 실행법
+- [x] `docs/09-interview-qa.md`: 예상 질문과 답
 
 **리허설**
-- [ ] 5분 시연: 로그인(이메일 우선) → 초대 → 영상 업로드·변환 → 코스 게시 → 배정 → 학습 → 퀴즈 → 수료증 → 대시보드 → 교차 테넌트 테스트 실행
-- [ ] 1분 아키텍처 설명, "가장 어려웠던 결정" 3분 이야기
+- [x] 5분 시연 대본: [10-demo-script.md](10-demo-script.md) — 로그인(이메일 우선) → 초대 → 영상 업로드·변환 → 코스 게시 → 배정 → 학습 → 퀴즈 → 수료증 → 대시보드 → 교차 테넌트 테스트 실행
+- [x] 1분 아키텍처 설명, "가장 어려웠던 결정" 3분 이야기 (같은 문서)
 
-**Should가 남아 있으면 이 순서로:** 관리자 OTP → SSO 시연(두 번째 렐름) → Back-Channel Logout → Playwright E2E 1개
+**Should가 남아 있으면 이 순서로:** 관리자 OTP → SSO 시연(두 번째 렐름) → Back-Channel Logout → Playwright E2E 1개 (**E2E는 했다**: 2개)
 
 ---
 

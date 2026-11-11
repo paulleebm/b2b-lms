@@ -388,7 +388,7 @@ lms/
 
 ### C2. UI — Tailwind CSS v4 + 자체 디자인 시스템 (`@lms/ui`) + DESIGN.md
 - **이유:** 컴포넌트 소스를 **우리 저장소에 소유**하므로 `packages/ui`가 진짜 디자인 시스템이 된다. Radix 기반이라 키보드·스크린리더 접근성이 기본이다. 디자인 토큰은 CSS 변수로 관리한다.
-- **디자인 방향은 [DESIGN.md](../DESIGN.md)가 정한다** ("인장과 이수증", 2026-11-06). shadcn의 기본 테마(Tailwind 기본 인디고 강조색)는 AI가 만든 화면의 대표 징후라 버렸고, shadcn은 "컴포넌트 소스를 복사해 소유한다"는 방식만 따른다.
+- **디자인 방향은 [DESIGN.md](../DESIGN.md)가 정한다** (2026-11-06 확정, 2026-11-10 보편적인 디자인으로 변경). shadcn의 기본 테마(Tailwind 기본 인디고 강조색)는 AI가 만든 화면의 대표 징후라 버렸고, shadcn은 "컴포넌트 소스를 복사해 소유한다"는 방식만 따른다.
 - 디자인 규칙은 open-design의 craft 규칙(상태 5종, 폼 검증, 접근성, 한글 조판)과 Impeccable·Anthropic frontend-design 스킬의 금지 목록을 출처와 함께 가져왔다([docs/design/](design/)).
 - **포기한 것:** MUI·Ant Design의 "다 만들어진 관리자 화면" 속도.
 

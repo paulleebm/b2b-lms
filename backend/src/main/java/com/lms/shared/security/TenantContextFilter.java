@@ -67,7 +67,7 @@ public class TenantContextFilter extends OncePerRequestFilter {
         context.setAuthentication(new JwtAuthenticationToken(auth.getToken(), authorities, auth.getName()));
         SecurityContextHolder.setContext(context);
 
-        TenantContext.set(principal.tenantId(), principal.userId());
+        TenantContext.set(principal.tenantId(), principal.userId(), principal.membershipId());
         if (principal.tenantId() != null) {
             MDC.put("tenantId", principal.tenantId().toString());
         }

@@ -43,4 +43,8 @@ class Tenant extends AbstractEntity {
     String getSlug() {
         return slug;
     }
+
+    String getKeycloakOrgId() {
+        return keycloakOrgId;
+    }
 }

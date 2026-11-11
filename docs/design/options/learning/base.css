@@ -1,0 +1,55 @@
+/* Shared by the learning-screen mockups. Tokens copied from packages/ui/src/styles.css. */
+@font-face { font-family: P; src: url("../../../../backend/src/main/resources/fonts/Pretendard-Regular.ttf"); font-weight: 400 500; }
+@font-face { font-family: P; src: url("../../../../backend/src/main/resources/fonts/Pretendard-Bold.ttf"); font-weight: 600 700; }
+:root {
+  --paper: #f7f7f4; --surface: #fff; --sunken: #f1f1ed; --line: #e1e2de; --ink: #161b24; --ink-2: #3a4250;
+  --muted: #5b6372; --shell: #1d2738; --shell-fg: #e9ecf1; --shell-muted: #a7b0bf; --shell-active: #2b3850;
+  --primary: #1d2738; --accent: #2f5fa8; --accent-soft: #e8eff8; --success: #1f7a4a; --success-soft: #e6f4ec;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: P, sans-serif; color: var(--ink); background: #e9e9e4; word-break: keep-all; padding: 32px; }
+.note { max-width: 1280px; margin: 0 auto 20px; }
+.note h1 { font-size: 22px; margin-bottom: 6px; }
+.note p { font-size: 14px; color: var(--ink-2); line-height: 1.7; }
+.label { font-size: 13px; font-weight: 600; color: var(--muted); margin: 26px auto 8px; max-width: 1280px; }
+.row { display: flex; gap: 24px; align-items: flex-start; max-width: 1280px; margin: 0 auto; }
+
+/* App frame: shell 240 + top bar 56 (DESIGN.md §5) */
+.desk { width: 1280px; min-height: 640px; display: grid; grid-template-columns: 240px 1fr; background: var(--paper); border: 1px solid var(--line); border-radius: 10px; overflow: hidden; margin: 0 auto; }
+.shell { background: var(--shell); color: var(--shell-fg); padding: 16px 12px; font-size: 14px; }
+.brand { display: flex; align-items: center; gap: 8px; font-weight: 700; margin-bottom: 20px; padding: 0 8px; }
+.brand svg { width: 26px; height: 26px; }
+.navi { padding: 8px 10px; border-radius: 6px; background: var(--shell-active); }
+.top { height: 56px; border-bottom: 1px solid var(--line); background: var(--surface); display: flex; align-items: center; justify-content: space-between; padding: 0 32px; font-size: 14px; font-weight: 600; }
+.top span { font-weight: 500; color: var(--muted); font-size: 13px; }
+.work { padding: 28px 32px 40px; }
+
+.phone { width: 360px; min-height: 720px; background: var(--paper); border: 1px solid var(--line); border-radius: 18px; overflow: hidden; flex: none; }
+.phone .top { padding: 0 16px; }
+.phone .work { padding: 20px 16px 32px; }
+
+/* Primitives */
+.panel { background: var(--surface); border: 1px solid var(--line); border-radius: 8px; }
+.back { font-size: 13px; color: var(--muted); display: inline-flex; gap: 4px; align-items: center; margin-bottom: 8px; }
+.h1 { font-size: 26px; font-weight: 700; line-height: 1.3; }
+.meta { font-size: 13px; color: var(--muted); }
+.btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; height: 40px; padding: 0 16px; border-radius: 6px; font-size: 14px; font-weight: 600; border: 1px solid transparent; white-space: nowrap; }
+.btn.lg { height: 48px; padding: 0 22px; font-size: 15px; }
+.btn.pri { background: var(--primary); color: #fff; }
+.btn.sec { background: var(--surface); border-color: var(--line); color: var(--ink); }
+.btn.ghost { color: var(--ink-2); }
+.badge { display: inline-flex; align-items: center; gap: 4px; height: 22px; padding: 0 8px; border-radius: 4px; font-size: 12px; font-weight: 600; background: var(--sunken); color: var(--ink-2); }
+.badge.ok { background: var(--success-soft); color: var(--success); }
+.bar { height: 6px; background: var(--sunken); border-radius: 3px; overflow: hidden; }
+.bar i { display: block; height: 100%; background: var(--accent); }
+.body p { font-size: 16px; line-height: 1.8; margin-bottom: 14px; color: var(--ink); max-width: 64ch; }
+.video { aspect-ratio: 16/9; background: #000; border-radius: 8px 8px 0 0; }
+svg.i { width: 16px; height: 16px; flex: none; stroke: currentColor; fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+
+/* Step markers: done (check on green), current (accent ring), todo (outline), locked */
+.dot { width: 24px; height: 24px; border-radius: 50%; display: grid; place-items: center; flex: none; font-size: 12px; font-weight: 700; }
+.dot.done { background: var(--success); color: #fff; }
+.dot.now { background: var(--surface); color: var(--accent); box-shadow: inset 0 0 0 2px var(--accent); }
+.dot.todo { background: var(--surface); color: var(--muted); box-shadow: inset 0 0 0 1.5px var(--line); }
+.dot.lock { background: var(--sunken); color: var(--muted); }
+.dot svg { width: 13px; height: 13px; stroke: currentColor; fill: none; stroke-width: 2.5; stroke-linecap: round; stroke-linejoin: round; }
