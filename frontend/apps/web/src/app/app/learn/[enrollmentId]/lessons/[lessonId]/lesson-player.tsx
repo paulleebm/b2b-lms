@@ -2,11 +2,12 @@
 
 import Link from "next/link";
 import * as React from "react";
-import { ArrowLeft, ArrowRight, CircleCheck, Download, ExternalLink } from "lucide-react";
-import type { LessonContent, ProgressResult } from "@lms/api-client";
+import { ArrowLeft, ArrowRight, CircleCheck, ClipboardCheck, Download, ExternalLink } from "lucide-react";
+import type { EnrollmentDetail, LessonContent, ProgressResult } from "@lms/api-client";
 import {
   Badge,
   Button,
+  CompletionMark,
   ErrorState,
   LoadingRegion,
   Notice,
@@ -14,19 +15,33 @@ import {
   Panel,
   PanelBody,
   Progress,
-  CompletionMark,
   Skeleton,
 } from "@lms/ui";
 
 import { api, describeError } from "@/lib/client-api";
-import { clock } from "@/lib/learning";
+import { QUIZ_STEP, clock, courseSteps } from "@/lib/learning";
+
+import { CourseStepsAside, CourseStepsFold } from "../../course-steps";
 
 /** Heartbeat cadence while playing (docs/05 §8: ~67 small UPDATEs/s for 1,000 concurrent learners). */
 const HEARTBEAT_MS = 15_000;
 
 type Problem = { title: string; detail?: string; traceId?: string };
 
-export function LessonPlayer({ enrollmentId, lessonId }: { enrollmentId: string; lessonId: string }) {
+/**
+ * A lesson with its course's steps beside it (DESIGN.md §4 "학습 단계 목록", layout B): the
+ * outline is a column on wide screens and one folded line ("2/4 · 제목") on phones.
+ * @param course the outline; null when it could not be loaded (the lesson still works)
+ */
+export function LessonPlayer({
+  enrollmentId,
+  lessonId,
+  course,
+}: {
+  enrollmentId: string;
+  lessonId: string;
+  course: EnrollmentDetail | null;
+}) {
   const [lesson, setLesson] = React.useState<LessonContent | null>(null);
   const [problem, setProblem] = React.useState<Problem | null>(null);
   const [progress, setProgress] = React.useState<ProgressResult | null>(null);
@@ -44,6 +59,8 @@ export function LessonPlayer({ enrollmentId, lessonId }: { enrollmentId: string;
   }, [enrollmentId, lessonId]);
 
   const completed = progress?.completed ?? lesson?.completed ?? false;
+  const outline = course ? courseSteps(course, completed ? lessonId : undefined) : null;
+  const quizStep = outline?.steps.find((s) => s.id === QUIZ_STEP);
 
   async function markDone() {
     setMarking(true);
@@ -57,9 +74,17 @@ export function LessonPlayer({ enrollmentId, lessonId }: { enrollmentId: string;
     }
   }
 
+  const backLink = (
+    <Link href={base} className="mb-2 inline-flex items-center gap-1 text-label text-muted hover:text-ink">
+      <ArrowLeft className="size-3.5" aria-hidden="true" />
+      {course?.title ?? "코스로"}
+    </Link>
+  );
+
   if (problem && !lesson) {
     return (
       <>
+        {backLink}
         <PageHeader title="레슨" />
         <Panel>
           <ErrorState title={problem.title} description={problem.detail ?? "잠시 후 다시 시도해 주세요."} traceId={problem.traceId} />
@@ -75,23 +100,27 @@ export function LessonPlayer({ enrollmentId, lessonId }: { enrollmentId: string;
 
   if (!lesson) {
     return (
-      <LoadingRegion label="레슨 불러오는 중" className="mx-auto grid max-w-[960px] gap-6">
+      <LoadingRegion label="레슨 불러오는 중" className="mx-auto grid max-w-[1120px] gap-6">
         <Skeleton className="h-8 w-1/2" />
-        <Skeleton className="aspect-video w-full" />
+        <Skeleton className="aspect-video w-full lg:w-[calc(100%-324px)]" />
       </LoadingRegion>
     );
   }
 
+  // After finishing: the next lesson, else the quiz once it opens, else back to the course.
+  const next = lesson.next
+    ? { href: `${base}/lessons/${lesson.next.id}`, label: lesson.next.title, icon: ArrowRight }
+    : quizStep?.href && quizStep.state !== "done"
+      ? { href: quizStep.href, label: "퀴즈 보기", icon: ClipboardCheck }
+      : { href: base, label: "코스로 돌아가기", icon: ArrowRight };
+  const NextIcon = next.icon;
+
   return (
-    <div className="mx-auto max-w-[960px]">
+    <div className="mx-auto max-w-[1120px]">
+      {backLink}
       <PageHeader
         title={lesson.title}
-        description={
-          <Link href={base} className="inline-flex items-center gap-1 text-label text-muted hover:text-ink">
-            <ArrowLeft className="size-3.5" aria-hidden="true" />
-            코스로
-          </Link>
-        }
+        className="mb-5"
         actions={
           completed ? (
             <Badge tone="success">
@@ -102,104 +131,92 @@ export function LessonPlayer({ enrollmentId, lessonId }: { enrollmentId: string;
         }
       />
 
-      <div className="grid gap-6">
-        {problem ? <Notice tone="danger" title={problem.title}>{problem.detail}</Notice> : null}
+      {outline && course ? <CourseStepsFold course={course} {...outline} currentId={lessonId} /> : null}
 
-        {progress?.courseCompleted ? (
-          <Panel>
-            <div className="flex flex-col items-center gap-4 px-6 py-8 text-center" role="status">
-              <CompletionMark size="lg" />
-              <div className="grid gap-1">
-                <p className="text-title font-semibold text-ink">코스를 수료했습니다</p>
-                {progress.certificateSerial ? (
-                  <p className="text-body-sm text-muted tabular">수료번호 {progress.certificateSerial}</p>
-                ) : null}
+      <div className="grid items-start gap-6 lg:grid-cols-[minmax(0,1fr)_300px]">
+        <div className="grid min-w-0 gap-6">
+          {problem ? <Notice tone="danger" title={problem.title}>{problem.detail}</Notice> : null}
+
+          {progress?.courseCompleted ? (
+            <Panel>
+              <div className="flex flex-col items-center gap-4 px-6 py-8 text-center" role="status">
+                <CompletionMark size="lg" />
+                <div className="grid gap-1">
+                  <p className="text-title font-semibold text-ink">코스를 수료했습니다</p>
+                  {progress.certificateSerial ? (
+                    <p className="text-body-sm text-muted tabular">수료번호 {progress.certificateSerial}</p>
+                  ) : null}
+                </div>
+                <Button asChild>
+                  <Link href={base}>코스 보기</Link>
+                </Button>
               </div>
-              <Button asChild>
-                <Link href={base}>코스 보기</Link>
+            </Panel>
+          ) : null}
+
+          {lesson.type === "VIDEO" && lesson.video ? (
+            <VideoLesson
+              lesson={lesson}
+              enrollmentId={enrollmentId}
+              onProgress={setProgress}
+              onError={setProblem}
+              progress={progress}
+            />
+          ) : null}
+
+          {lesson.type === "TEXT" ? (
+            <Panel>
+              <PanelBody className="pt-5">
+                <article className="max-w-prose text-body leading-[1.8] text-ink">
+                  {(lesson.body ?? "").split(/\n{2,}/).map((paragraph, i) => (
+                    <p key={i} className="mb-4 whitespace-pre-wrap last:mb-0">
+                      {paragraph}
+                    </p>
+                  ))}
+                </article>
+              </PanelBody>
+            </Panel>
+          ) : null}
+
+          {lesson.type === "DOCUMENT" && lesson.document ? (
+            <Panel>
+              <PanelBody className="flex flex-wrap items-center justify-between gap-4">
+                <div className="grid gap-0.5">
+                  <p className="font-medium text-ink">{lesson.document.fileName}</p>
+                  <p className="text-label text-muted">링크는 5분 동안 유효합니다. 만료되면 이 화면을 새로고침하세요.</p>
+                </div>
+                <Button asChild variant="secondary">
+                  <a href={lesson.document.url} target="_blank" rel="noopener noreferrer">
+                    <Download aria-hidden="true" />
+                    문서 열기
+                    <ExternalLink className="size-3.5" aria-hidden="true" />
+                  </a>
+                </Button>
+              </PanelBody>
+            </Panel>
+          ) : null}
+
+          {/* One action: finish this step, then go on. Earlier steps are in the outline. */}
+          {!completed && lesson.type !== "VIDEO" ? (
+            <div className="flex justify-end">
+              <Button onClick={markDone} loading={marking} className="w-full sm:w-auto">
+                <CircleCheck aria-hidden="true" />
+                {lesson.type === "TEXT" ? "다 읽었어요" : "확인했어요"}
               </Button>
             </div>
-          </Panel>
-        ) : null}
-
-        {lesson.type === "VIDEO" && lesson.video ? (
-          <VideoLesson
-            lesson={lesson}
-            enrollmentId={enrollmentId}
-            onProgress={setProgress}
-            onError={setProblem}
-            progress={progress}
-          />
-        ) : null}
-
-        {lesson.type === "TEXT" ? (
-          <Panel>
-            <PanelBody className="pt-5">
-              <article className="max-w-prose text-body leading-[1.8] text-ink">
-                {(lesson.body ?? "").split(/\n{2,}/).map((paragraph, i) => (
-                  <p key={i} className="mb-4 whitespace-pre-wrap last:mb-0">
-                    {paragraph}
-                  </p>
-                ))}
-              </article>
-            </PanelBody>
-          </Panel>
-        ) : null}
-
-        {lesson.type === "DOCUMENT" && lesson.document ? (
-          <Panel>
-            <PanelBody className="flex flex-wrap items-center justify-between gap-4">
-              <div className="grid gap-0.5">
-                <p className="font-medium text-ink">{lesson.document.fileName}</p>
-                <p className="text-label text-muted">링크는 5분 동안 유효합니다. 만료되면 이 화면을 새로고침하세요.</p>
-              </div>
-              <Button asChild variant="secondary">
-                <a href={lesson.document.url} target="_blank" rel="noopener noreferrer">
-                  <Download aria-hidden="true" />
-                  문서 열기
-                  <ExternalLink className="size-3.5" aria-hidden="true" />
-                </a>
+          ) : completed && !progress?.courseCompleted ? (
+            <div className="flex justify-end">
+              <Button asChild className="w-full sm:w-auto">
+                <Link href={next.href}>
+                  <span className="max-w-[20rem] truncate">{next.label}</span>
+                  <NextIcon aria-hidden="true" />
+                </Link>
               </Button>
-            </PanelBody>
-          </Panel>
-        ) : null}
+            </div>
+          ) : null}
+        </div>
 
-        {lesson.type !== "VIDEO" && !completed ? (
-          <div className="flex justify-end">
-            <Button onClick={markDone} loading={marking}>
-              <CircleCheck aria-hidden="true" />
-              {lesson.type === "TEXT" ? "다 읽었어요" : "확인했어요"}
-            </Button>
-          </div>
-        ) : null}
-
-        <nav aria-label="레슨 이동" className="flex flex-wrap justify-between gap-3 border-t border-line pt-4">
-          {lesson.previous ? (
-            <Button asChild variant="ghost">
-              <Link href={`${base}/lessons/${lesson.previous.id}`}>
-                <ArrowLeft aria-hidden="true" />
-                <span className="max-w-[16rem] truncate">{lesson.previous.title}</span>
-              </Link>
-            </Button>
-          ) : (
-            <span />
-          )}
-          {lesson.next ? (
-            <Button asChild variant={completed ? "primary" : "secondary"}>
-              <Link href={`${base}/lessons/${lesson.next.id}`}>
-                <span className="max-w-[16rem] truncate">{lesson.next.title}</span>
-                <ArrowRight aria-hidden="true" />
-              </Link>
-            </Button>
-          ) : (
-            <Button asChild variant={completed ? "primary" : "secondary"}>
-              <Link href={base}>
-                코스로 돌아가기
-                <ArrowRight aria-hidden="true" />
-              </Link>
-            </Button>
-          )}
-        </nav>
+        {outline && course ? <CourseStepsAside course={course} {...outline} currentId={lessonId} /> : null}
       </div>
     </div>
   );

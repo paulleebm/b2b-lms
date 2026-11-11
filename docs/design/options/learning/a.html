@@ -1,0 +1,36 @@
+<!doctype html><html lang="ko"><head><meta charset="utf-8"><title>A. 단계 막대</title>
+<link rel="stylesheet" href="base.css"><style>
+.stepper{display:grid;grid-template-columns:repeat(4,1fr);gap:0;margin:22px 0 24px}
+.st{position:relative;display:grid;justify-items:center;gap:8px;text-align:center;padding:0 6px}
+.st:not(:last-child)::after{content:"";position:absolute;top:12px;left:calc(50% + 18px);right:calc(-50% + 18px);height:2px;background:var(--line)}
+.st.done:not(:last-child)::after{background:var(--success)}
+.st b{font-size:13px;font-weight:600;color:var(--ink-2);line-height:1.4}
+.st.now b{color:var(--ink)}
+.st small{font-size:12px;color:var(--muted)}
+.cur{display:flex;align-items:center;justify-content:space-between;gap:16px;padding:20px 24px}
+.cur small{font-size:13px;color:var(--muted)}
+.cur h3{font-size:20px;margin-top:2px}
+.mini{display:flex;align-items:center;gap:10px;margin:2px 0 18px}
+.mini .seg{flex:1;display:grid;grid-template-columns:repeat(4,1fr);gap:4px}
+.mini .seg i{height:4px;border-radius:2px;background:var(--line)}
+.mini .seg i.done{background:var(--success)}.mini .seg i.now{background:var(--accent)}
+.lt{font-size:13px;color:var(--muted)}
+.foot{display:flex;justify-content:space-between;align-items:center;border-top:1px solid var(--line);margin-top:20px;padding-top:16px}
+</style></head><body>
+<div class="note"><h1>A. 단계 막대</h1><p>두 화면 모두 위쪽에 가로 단계 막대(완료 · 지금 · 남음 · 잠김)를 둡니다. 코스 화면은 막대 + '지금 할 단계' 카드 하나뿐이라 가장 짧습니다. 단계가 6개를 넘으면 가로 막대가 비좁아져 제목이 줄어드는 것이 약점입니다(그때는 세로 목록으로 바꿈). 휴대폰은 막대 대신 4칸 선.</p></div>
+<p class="label">코스 화면</p><div class="desk"><aside class="shell"><div class="brand"><svg viewBox="0 0 32 32"><rect width="32" height="32" rx="8" fill="#E9ECF1"/><path d="M11 8v14.5h4.5L24 12" fill="none" stroke="#1D2738" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>LMS</div><div class="navi">내 교육</div></aside><div><div class="top">데모전자<span>박서연 · 학습자</span></div><main class="work"><p class="back"><svg class="i" viewBox="0 0 24 24"><path d="M15 6l-6 6 6 6"/></svg>내 교육</p><h2 class="h1">정보보안 기초</h2>
+<p class="meta" style="margin-top:6px">마감 11월 14일 · 4단계 중 1단계 완료</p>
+<div class="panel" style="margin-top:20px;padding:4px 24px 0"><div class="stepper"><div class="st done"><span class="dot done"><svg viewBox="0 0 24 24"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></span><b>피싱 메일 알아보기</b><small>영상</small></div><div class="st now"><span class="dot now">2</span><b>안전한 비밀번호</b><small>텍스트</small></div><div class="st todo"><span class="dot todo">3</span><b>사내 자료 반출 규칙</b><small>텍스트</small></div><div class="st lock"><span class="dot lock"><svg viewBox="0 0 24 24"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg></span><b>최종 퀴즈</b><small>퀴즈</small></div></div></div>
+<div class="panel cur" style="margin-top:16px"><div><small>2단계 · 텍스트</small><h3>안전한 비밀번호</h3></div>
+<span class="btn pri lg"><svg class="i" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M10 8.5v7l5.5-3.5z"/></svg>이어서 학습하기</span></div></main></div></div>
+<p class="label">레슨 화면 (데스크톱 1280 · 휴대폰 360)</p>
+<div class="row"><div class="desk"><aside class="shell"><div class="brand"><svg viewBox="0 0 32 32"><rect width="32" height="32" rx="8" fill="#E9ECF1"/><path d="M11 8v14.5h4.5L24 12" fill="none" stroke="#1D2738" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>LMS</div><div class="navi">내 교육</div></aside><div><div class="top">데모전자<span>박서연 · 학습자</span></div><main class="work"><p class="back"><svg class="i" viewBox="0 0 24 24"><path d="M15 6l-6 6 6 6"/></svg>정보보안 기초</p><h2 class="h1">안전한 비밀번호</h2>
+<div class="panel" style="margin-top:16px;padding:0 24px"><div class="stepper"><div class="st done"><span class="dot done"><svg viewBox="0 0 24 24"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></span><b>피싱 메일 알아보기</b></div><div class="st now"><span class="dot now">2</span><b>안전한 비밀번호</b></div><div class="st todo"><span class="dot todo">3</span><b>사내 자료 반출 규칙</b></div><div class="st lock"><span class="dot lock"><svg viewBox="0 0 24 24"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg></span><b>최종 퀴즈</b></div></div></div>
+<div class="panel" style="margin-top:16px;padding:24px"><div class="body"><p>안전한 비밀번호</p><p>이 레슨은 데모용 본문입니다. 업무에서 지켜야 할 원칙을 읽고 '다 읽었어요'를 누르세요.</p></div>
+<div class="foot"><span class="btn ghost"><svg class="i" viewBox="0 0 24 24"><path d="M15 6l-6 6 6 6"/></svg>피싱 메일 알아보기</span><span class="btn pri">다 읽었어요</span></div></div></main></div></div></div>
+<div class="row" style="margin-top:24px"><div class="phone"><div class="top">데모전자<span>박서연</span></div><main class="work"><p class="back"><svg class="i" viewBox="0 0 24 24"><path d="M15 6l-6 6 6 6"/></svg>정보보안 기초</p>
+<div class="mini"><span class="lt">2/4단계</span><div class="seg"><i class="done"></i><i class="now"></i><i></i><i></i></div></div>
+<h2 class="h1" style="font-size:22px">안전한 비밀번호</h2>
+<div class="panel" style="margin-top:14px;padding:18px"><div class="body"><p>안전한 비밀번호</p><p>이 레슨은 데모용 본문입니다. 업무에서 지켜야 할 원칙을 읽고 '다 읽었어요'를 누르세요.</p></div></div>
+<div style="display:grid;gap:8px;margin-top:16px"><span class="btn pri lg">다 읽었어요</span><span class="btn ghost"><svg class="i" viewBox="0 0 24 24"><path d="M15 6l-6 6 6 6"/></svg>이전 단계</span></div></main></div></div>
+</body></html>

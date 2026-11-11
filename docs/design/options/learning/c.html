@@ -1,0 +1,33 @@
+<!doctype html><html lang="ko"><head><meta charset="utf-8"><title>C. 집중</title>
+<link rel="stylesheet" href="base.css"><style>
+.crumb{display:flex;align-items:center;gap:12px;font-size:13px;color:var(--muted)}
+.crumb b{color:var(--ink);font-weight:600}
+.seg{display:grid;grid-template-columns:repeat(4,1fr);gap:4px;margin:12px 0 22px}
+.seg i{height:4px;border-radius:2px;background:var(--line)}
+.seg i.done{background:var(--success)}.seg i.now{background:var(--accent)}
+.next{padding:28px;display:grid;gap:14px}
+.next small{font-size:13px;color:var(--muted)}
+.next h3{font-size:24px;line-height:1.3}
+.check{list-style:none;margin-top:24px}
+.check li{display:flex;align-items:center;gap:12px;padding:12px 4px;font-size:15px;color:var(--ink-2);border-top:1px solid var(--line)}
+.check li:last-child{border-bottom:1px solid var(--line)}
+.check li.now{color:var(--ink);font-weight:600}
+.check li .s{margin-left:auto;font-size:13px;color:var(--muted);font-weight:500}
+.dock{display:flex;justify-content:space-between;align-items:center;margin-top:20px}
+</style></head><body>
+<div class="note"><h1>C. 집중</h1><p>레슨 화면에는 '코스 이름 · 2/4 단계'와 4칸 진행선, 본문, 버튼만 남깁니다. 목차는 코스 화면에만 둡니다. 코스 화면은 맨 위에 '지금 할 단계' 카드 하나, 그 아래 단계 체크리스트. 가장 조용하지만, 레슨 화면에서 다른 단계 제목은 보이지 않습니다.</p></div>
+<p class="label">코스 화면</p><div class="desk"><aside class="shell"><div class="brand"><svg viewBox="0 0 32 32"><rect width="32" height="32" rx="8" fill="#E9ECF1"/><path d="M11 8v14.5h4.5L24 12" fill="none" stroke="#1D2738" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>LMS</div><div class="navi">내 교육</div></aside><div><div class="top">데모전자<span>박서연 · 학습자</span></div><main class="work"><p class="back"><svg class="i" viewBox="0 0 24 24"><path d="M15 6l-6 6 6 6"/></svg>내 교육</p><h2 class="h1">정보보안 기초</h2>
+<p class="meta" style="margin-top:6px">마감 11월 14일 · 1/4 단계</p><div class="seg"><i class="done"></i><i class="now"></i><i></i><i></i></div>
+<div class="panel next"><small>지금 할 단계 · 2/4 · 텍스트</small><h3>안전한 비밀번호</h3>
+<div><span class="btn pri lg"><svg class="i" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M10 8.5v7l5.5-3.5z"/></svg>이어서 학습하기</span></div></div>
+<ul class="check"><li class="done"><span class="dot done"><svg viewBox="0 0 24 24"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></span><span>피싱 메일 알아보기</span><span class="s">완료</span></li><li class="now"><span class="dot now">2</span><span>안전한 비밀번호</span><span class="s">진행 중</span></li><li class="todo"><span class="dot todo">3</span><span>사내 자료 반출 규칙</span><span class="s"></span></li><li class="lock"><span class="dot lock"><svg viewBox="0 0 24 24"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg></span><span>최종 퀴즈</span><span class="s">레슨을 마치면 열림</span></li></ul></main></div></div>
+<p class="label">레슨 화면 (데스크톱 1280 · 휴대폰 360)</p>
+<div class="row"><div class="desk"><aside class="shell"><div class="brand"><svg viewBox="0 0 32 32"><rect width="32" height="32" rx="8" fill="#E9ECF1"/><path d="M11 8v14.5h4.5L24 12" fill="none" stroke="#1D2738" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>LMS</div><div class="navi">내 교육</div></aside><div><div class="top">데모전자<span>박서연 · 학습자</span></div><main class="work"><div class="crumb"><svg class="i" viewBox="0 0 24 24"><path d="M15 6l-6 6 6 6"/></svg><b>정보보안 기초</b><span>2/4 단계</span></div><div class="seg"><i class="done"></i><i class="now"></i><i></i><i></i></div>
+<div style="max-width:760px"><h2 class="h1">안전한 비밀번호</h2>
+<div class="panel" style="margin-top:16px;padding:28px"><div class="body"><p>안전한 비밀번호</p><p>이 레슨은 데모용 본문입니다. 업무에서 지켜야 할 원칙을 읽고 '다 읽었어요'를 누르세요.</p></div></div>
+<div class="dock"><span class="btn ghost"><svg class="i" viewBox="0 0 24 24"><path d="M15 6l-6 6 6 6"/></svg>이전</span><span class="btn pri lg">다 읽었어요</span></div></div></main></div></div></div>
+<div class="row" style="margin-top:24px"><div class="phone"><div class="top">데모전자<span>박서연</span></div><main class="work"><div class="crumb"><svg class="i" viewBox="0 0 24 24"><path d="M15 6l-6 6 6 6"/></svg><b>정보보안 기초</b><span>2/4</span></div><div class="seg"><i class="done"></i><i class="now"></i><i></i><i></i></div>
+<h2 class="h1" style="font-size:22px">안전한 비밀번호</h2>
+<div class="panel" style="margin-top:14px;padding:18px"><div class="body"><p>안전한 비밀번호</p><p>이 레슨은 데모용 본문입니다. 업무에서 지켜야 할 원칙을 읽고 '다 읽었어요'를 누르세요.</p></div></div>
+<div class="dock"><span class="btn ghost"><svg class="i" viewBox="0 0 24 24"><path d="M15 6l-6 6 6 6"/></svg>이전</span><span class="btn pri lg">다 읽었어요</span></div></main></div></div>
+</body></html>

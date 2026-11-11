@@ -8,6 +8,7 @@ export { CompletionMark, type CompletionMarkProps } from "./components/completio
 export { BrandMark } from "./components/brand-mark";
 export { Badge, badgeVariants, StatusBadge, type BadgeProps, type EnrollmentStatus } from "./components/status-badge";
 export { Progress, type ProgressProps } from "./components/progress";
+export { StepList, type Step, type StepKind, type StepListProps, type StepState } from "./components/step-list";
 export { EmptyState, ErrorState, LoadingRegion, Skeleton } from "./components/states";
 export { StatStrip, type Stat } from "./components/stat-strip";
 export { DataTable, type Column, type DataTableProps, type SortState } from "./components/data-table";

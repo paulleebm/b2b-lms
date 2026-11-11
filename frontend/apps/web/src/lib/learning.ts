@@ -1,5 +1,5 @@
-import type { MyEnrollment } from "@lms/api-client";
-import type { EnrollmentStatus, LearnerCourse } from "@lms/ui";
+import type { EnrollmentDetail, MyEnrollment } from "@lms/api-client";
+import type { EnrollmentStatus, LearnerCourse, Step, StepKind } from "@lms/ui";
 
 const SEOUL = "Asia/Seoul";
 const DAY_MS = 24 * 60 * 60 * 1000;
@@ -62,3 +62,44 @@ export function clock(seconds: number): string {
   const sec = String(s % 60).padStart(2, "0");
   return h > 0 ? `${h}:${String(m).padStart(2, "0")}:${sec}` : `${m}:${sec}`;
 }
+
+/** Shape of EnrollmentDetail that the step list needs (also built on the client after a lesson completes). */
+type CourseForSteps = Pick<EnrollmentDetail, "id" | "sections" | "quiz" | "lessonsDone" | "lessonsTotal" | "nextLesson">;
+
+/**
+ * Lessons in order, then the final quiz as the last step (decided 2026-11-10). The quiz opens
+ * once every lesson is done; until then it is a locked step with no link.
+ * @param justCompleted a lesson the learner finished on this page after it loaded
+ */
+export function courseSteps(course: CourseForSteps, justCompleted?: string): { steps: Step[]; done: number } {
+  const base = `/app/learn/${course.id}`;
+  const steps: Step[] = course.sections.flatMap((section) =>
+    section.lessons.map((lesson) => {
+      const done = lesson.completed || lesson.id === justCompleted;
+      return {
+        id: lesson.id,
+        title: lesson.title,
+        kind: lesson.type as StepKind,
+        state: done ? "done" : "todo",
+        href: `${base}/lessons/${lesson.id}`,
+        percent: !done && lesson.percent ? lesson.percent : undefined,
+      } satisfies Step;
+    }),
+  );
+  const lessonsDone = steps.filter((s) => s.state === "done").length;
+  const quiz = course.quiz;
+  if (quiz) {
+    const unlocked = quiz.unlocked || lessonsDone === steps.length;
+    steps.push({
+      id: QUIZ_STEP,
+      title: "최종 퀴즈",
+      kind: "QUIZ",
+      state: quiz.passed ? "done" : unlocked ? "todo" : "locked",
+      href: unlocked ? `${base}/quiz` : undefined,
+    });
+  }
+  return { steps, done: steps.filter((s) => s.state === "done").length };
+}
+
+/** Step id of the final quiz in {@link courseSteps}. */
+export const QUIZ_STEP = "quiz";
