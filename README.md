@@ -27,7 +27,7 @@
 |---|---|---|
 | **멀티테넌트 격리** | 회사 간 데이터 격리를 **앱(Hibernate `@TenantId`)과 DB(PostgreSQL RLS) 두 겹**으로 막고, 테스트로 증명 | [`TenantIsolationIT`](backend/src/test/java/com/lms/TenantIsolationIT.java), [`RowLevelSecurityIT`](backend/src/test/java/com/lms/RowLevelSecurityIT.java) |
 | **커넥션 풀 함정** | 풀로 돌아간 커넥션에 이전 회사 정보가 남지 않도록 반납 시 초기화 | [`ConnectionPoolTenantLeakIT`](backend/src/test/java/com/lms/ConnectionPoolTenantLeakIT.java) |
-| **표준 인증** | 인증은 직접 만들지 않고 **Keycloak(OIDC)**, 브라우저에는 토큰 대신 세션 쿠키만 두는 **BFF** | [BFF 흐름](docs/05-service-flows.md#1-로그인-bff--keycloak-이메일-우선) |
+| **표준 인증** | 인증은 직접 만들지 않고 **Keycloak(OIDC)**, 브라우저에는 토큰 대신 세션 쿠키만 두는 **BFF** | [BFF 흐름](docs/05-service-flows.md#1-로그인-bff--keycloak) |
 | **분산 작업의 보상** | 회사 등록 = Keycloak 조직 생성 + DB 저장. 실패하면 조직을 지우는 사가(보상 작업) | [`TenantRegistrationService`](backend/src/main/java/com/lms/tenancy/internal/TenantRegistrationService.java) |
 | **모듈 경계** | 모듈러 모놀리스. 모듈이 다른 모듈 내부를 참조하면 빌드 실패 | [`ModularityTest`](backend/src/test/java/com/lms/ModularityTest.java) |
 | **동시성은 DB 제약으로** | 중복 배정·이중 제출·동시 수료를 "조회 후 생성" 대신 `ON CONFLICT`, 부분 유니크 인덱스, 조건부 UPDATE로 | [`LearningFlowIT`](backend/src/test/java/com/lms/LearningFlowIT.java), [Day 3 노트](docs/notes/day3.md) |
@@ -80,7 +80,7 @@ flowchart LR
 |---|---|---|
 | 백엔드 | **Java 21 · Spring Boot 4 · Spring Modulith** | 국내 백엔드 표준. Modulith로 모듈 경계를 테스트로 강제 |
 | 데이터 | **PostgreSQL + JPA(Hibernate) + Flyway** | MySQL 대신 Postgres를 고른 결정적 이유는 RLS |
-| 인증 | **Keycloak (Organizations)** | "인증은 직접 만들지 않는다". 이메일 우선 로그인·회사 SSO·MFA를 설정으로 |
+| 인증 | **Keycloak (Organizations)** | "인증은 직접 만들지 않는다". 회사(조직)·회사 SSO·MFA를 설정으로 |
 | 웹 | **Next.js 16 (App Router) + BFF** | 토큰을 브라우저에 두지 않는 IETF 권장 방식, 서버 컴포넌트로 렌더링 |
 | UI | **자체 디자인 시스템 `@lms/ui` (Tailwind v4, Radix)** | shadcn 기본 테마 대신 직접 정한 토큰과 규칙 ([DESIGN.md](DESIGN.md)) |
 | 디자인 검증 | **Storybook 10 + Vitest(Chromium) + axe** | 접근성 위반이 있으면 테스트 실패 |
@@ -241,7 +241,7 @@ DESIGN.md · PRODUCT.md  디자인 계약서, 제품 요약
 
 | 문서 | 내용 |
 |---|---|
-| [01 제품 기획](docs/01-product.md) | 사용자 모델(멤버십), 이메일 우선 로그인, 시나리오, LMS 표준(xAPI·SCORM) |
+| [01 제품 기획](docs/01-product.md) | 사용자 모델(멤버십), 로그인, 시나리오, LMS 표준(xAPI·SCORM) |
 | [02 기술 결정](docs/02-tech-decisions.md) | 후보 → 선택 → 이유 → 포기한 것 |
 | [03 아키텍처](docs/03-architecture.md) | AWS 구성, 요청 생애주기, 멀티테넌트 격리 상세 |
 | [04 데이터 모델](docs/04-data-model.md) | ERD와 설계 이유, 동시성 제어 |

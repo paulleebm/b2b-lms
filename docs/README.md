@@ -6,7 +6,7 @@ B2B 멀티테넌트 사내교육 LMS의 기획·설계 문서다. 모든 결정�
 
 | 문서 | 내용 |
 |---|---|
-| [01-product.md](01-product.md) | 무엇을, 누구를 위해 만드나: 멤버십 모델, 이메일 우선 로그인, 시나리오, LMS 표준(xAPI·SCORM), MoSCoW 범위 |
+| [01-product.md](01-product.md) | 무엇을, 누구를 위해 만드나: 멤버십 모델, 로그인, 시나리오, LMS 표준(xAPI·SCORM), MoSCoW 범위 |
 | [02-tech-decisions.md](02-tech-decisions.md) | 기술 선택 기록(ADR): 후보, 선택 이유, 포기한 것 |
 | [03-architecture.md](03-architecture.md) | AWS 구성도, 네트워크·보안 그룹, 요청 생애주기, 멀티테넌트 격리, Modulith 모듈, API |
 | [04-data-model.md](04-data-model.md) | ERD와 테이블 설계 이유, 동시성 제어 |

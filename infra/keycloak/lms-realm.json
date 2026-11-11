@@ -105,5 +105,42 @@
         "realm-management": ["manage-realm", "manage-users", "view-users", "query-users"]
       }
     }
+  ],
+  "browserFlow": "browser-one-page",
+  "authenticationFlows": [
+    {
+      "alias": "browser-one-page",
+      "description": "Email and password on one page, instead of the built-in identity-first flow (email, then password). Members of several organizations pick one in the app (/onboarding): see docs/01 section 3.",
+      "providerId": "basic-flow",
+      "topLevel": true,
+      "builtIn": false,
+      "authenticationExecutions": [
+        { "authenticator": "auth-cookie", "authenticatorFlow": false, "requirement": "ALTERNATIVE", "priority": 10, "userSetupAllowed": false },
+        { "authenticator": "identity-provider-redirector", "authenticatorFlow": false, "requirement": "ALTERNATIVE", "priority": 20, "userSetupAllowed": false },
+        { "flowAlias": "browser-one-page forms", "authenticatorFlow": true, "requirement": "ALTERNATIVE", "priority": 30, "userSetupAllowed": false }
+      ]
+    },
+    {
+      "alias": "browser-one-page forms",
+      "description": "Email and password, then OTP for users who set one up.",
+      "providerId": "basic-flow",
+      "topLevel": false,
+      "builtIn": false,
+      "authenticationExecutions": [
+        { "authenticator": "auth-username-password-form", "authenticatorFlow": false, "requirement": "REQUIRED", "priority": 10, "userSetupAllowed": false },
+        { "flowAlias": "browser-one-page conditional otp", "authenticatorFlow": true, "requirement": "CONDITIONAL", "priority": 20, "userSetupAllowed": false }
+      ]
+    },
+    {
+      "alias": "browser-one-page conditional otp",
+      "description": "OTP only when the user has configured it.",
+      "providerId": "basic-flow",
+      "topLevel": false,
+      "builtIn": false,
+      "authenticationExecutions": [
+        { "authenticator": "conditional-user-configured", "authenticatorFlow": false, "requirement": "REQUIRED", "priority": 10, "userSetupAllowed": false },
+        { "authenticator": "auth-otp-form", "authenticatorFlow": false, "requirement": "REQUIRED", "priority": 20, "userSetupAllowed": false }
+      ]
+    }
   ]
 }
